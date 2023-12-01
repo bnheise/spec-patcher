@@ -1,0 +1,37 @@
+[package]
+name = "spec-patcher"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "src/main.rs"
+name = "spec-pather-cli"
+
+[dependencies]
+anyhow = { version = "1.0.75", default-features = false, features = [] }
+clap = { version = "4.4.10", default-features = false, features = [
+  "color",
+  "help",
+  "error-context",
+  "suggestions",
+  "usage",
+  "std",
+  "derive",
+] }
+config = { version = "0.13.4", default-features = false, features = ["yaml"] }
+openapi = { version = "0.1.5", default-features = false }
+reqwest = { version = "0.11.22", default-features = false, features = [
+  "blocking",
+  "json",
+] }
+serde = { version = "1.0.193", default-features = false, features = [
+  "derive",
+  "std",
+] }
+thiserror = { version = "1.0.50", default-features = false, features = [] }
+url = { version = "2.5.0", default-features = false, features = ["serde"] }
