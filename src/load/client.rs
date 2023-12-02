@@ -1,6 +1,12 @@
-use crate::config::{sub::connection::TokenAuth, Config};
+use crate::config::{
+    sub::connection::{Auth, TokenAuth},
+    Config,
+};
 use liferay_object::models::ObjectDefinition;
-use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE};
+use reqwest::{
+    blocking::RequestBuilder,
+    header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE},
+};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use url::Url;
@@ -19,20 +25,25 @@ impl Client {
         }
     }
 
-    pub fn get_spec(&self, config: &Config) -> Result<openapi::Spec, ClientError> {
-        self.client
-            .get(config.connection.base_url.as_str())
-            .send()
+    pub fn get_spec(
+        &mut self,
+        config: &Config,
+        endpoint: String,
+    ) -> Result<openapi::Spec, ClientError> {
+        let mut req = self.client.get(config.connection.base_url.join(&endpoint)?);
+        req = self.set_auth(req, config)?;
+        req.send()
             .map_err(ClientError::Send)?
             .json()
             .map_err(|e| ClientError::Deserialize(e, "openapi spec"))
     }
 
-    pub fn get_def(&mut self, config: &Config) -> Result<ObjectDefinition, ClientError> {
-        let url = Self::format_object_def_url(&config.connection.base_url, &config.source.erc)?;
-        let mut req = self.client.get(url);
-
-        req = match &config.connection.auth {
+    fn set_auth(
+        &mut self,
+        req: RequestBuilder,
+        config: &Config,
+    ) -> Result<RequestBuilder, ClientError> {
+        let req = match &config.connection.auth {
             crate::config::sub::connection::Auth::Basic(basic) => {
                 req.basic_auth(basic.username.to_owned(), Some(basic.password.to_owned()))
             }
@@ -41,6 +52,15 @@ impl Client {
                 req.bearer_auth(token)
             }
         };
+
+        Ok(req)
+    }
+
+    pub fn get_def(&mut self, config: &Config) -> Result<ObjectDefinition, ClientError> {
+        let url = Self::format_object_def_url(&config.connection.base_url, &config.source.erc)?;
+        let mut req = self.client.get(url);
+
+        req = self.set_auth(req, config)?;
 
         let res = req.send().map_err(ClientError::Send)?;
 
@@ -131,4 +151,6 @@ pub enum ClientError {
     Deserialize(reqwest::Error, &'static str),
     #[error("Failed to format request url")]
     UrlFormat(#[from] url::ParseError),
+    #[error("Missing required field from API response: {0}")]
+    MissingField(&'static str),
 }
