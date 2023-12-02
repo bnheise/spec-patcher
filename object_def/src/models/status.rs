@@ -10,26 +10,23 @@ use serde::{Deserialize, Serialize};
  */
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct ObjectViewColumn {
-    #[serde(rename = "id", skip_serializing_if = "Option::is_none")]
-    pub id: Option<i64>,
+pub struct Status {
+    #[serde(rename = "code", skip_serializing_if = "Option::is_none")]
+    pub code: Option<i32>,
     #[serde(rename = "label", skip_serializing_if = "Option::is_none")]
-    pub label: Option<::std::collections::HashMap<String, String>>,
-    #[serde(rename = "objectFieldName", skip_serializing_if = "Option::is_none")]
-    pub object_field_name: Option<String>,
-    #[serde(rename = "priority", skip_serializing_if = "Option::is_none")]
-    pub priority: Option<i32>,
+    pub label: Option<String>,
+    #[serde(rename = "label_i18n", skip_serializing_if = "Option::is_none")]
+    pub label_i18n: Option<String>,
     #[serde(rename = "x-class-name", skip_serializing_if = "Option::is_none")]
     pub x_class_name: Option<String>,
 }
 
-impl ObjectViewColumn {
-    pub fn new() -> ObjectViewColumn {
-        ObjectViewColumn {
-            id: None,
+impl Status {
+    pub fn new() -> Status {
+        Status {
+            code: None,
             label: None,
-            object_field_name: None,
-            priority: None,
+            label_i18n: None,
             x_class_name: None,
         }
     }

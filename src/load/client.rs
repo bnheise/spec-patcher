@@ -1,5 +1,6 @@
 use crate::config::Config;
 use thiserror::Error;
+use url::Url;
 
 use super::ObjectDef;
 
@@ -24,30 +25,39 @@ impl Client {
             .map_err(|e| ClientError::Deserialize(e, "openapi spec"))
     }
 
-    // fn format_url(base_url: &Url, source: &Source) -> Url {}
-
     pub fn get_def(&self, config: &Config) -> Result<ObjectDef, ClientError> {
-        let erc = &config.source.erc;
-        let url = Self::format_object_def_url(config.connection.base_url.as_str(), erc);
-        self.client
-            .get(url)
-            .send()
-            .map_err(ClientError::Send)?
-            .json()
+        let url = Self::format_object_def_url(&config.connection.base_url, &config.source.erc)?;
+        let mut req = self.client.get(url);
+
+        req = match &config.connection.auth {
+            crate::config::sub::connection::Auth::Basic(basic) => {
+                req.basic_auth(basic.username.to_owned(), Some(basic.password.to_owned()))
+            }
+            crate::config::sub::connection::Auth::OAuth(_) => todo!(),
+        };
+
+        let res = req.send().map_err(ClientError::Send)?;
+
+        res.error_for_status_ref()?;
+
+        res.json()
             .map_err(|e| ClientError::Deserialize(e, "object definition"))
     }
 
-    fn format_object_def_url(base_url: &str, erc: &str) -> String {
-        format!(
-            "{base_url}/o/object-admin/v1.0/object-definitions/by-external-reference-code/${erc}"
-        )
+    fn format_object_def_url(base_url: &Url, erc: &str) -> Result<Url, ClientError> {
+        let endpoint =
+            format!("/o/object-admin/v1.0/object-definitions/by-external-reference-code/{erc}");
+
+        Ok(base_url.join(&endpoint)?)
     }
 }
 
 #[derive(Debug, Error)]
 pub enum ClientError {
     #[error("Http request failed: {0}")]
-    Send(reqwest::Error),
+    Send(#[from] reqwest::Error),
     #[error("Failed to deserialize response: {0}")]
     Deserialize(reqwest::Error, &'static str),
+    #[error("Failed to format request url")]
+    UrlFormat(#[from] url::ParseError),
 }
