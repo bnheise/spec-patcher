@@ -1,13 +1,11 @@
-use serde::Deserialize;
-
-use crate::config::{sub::source::SourceType, Config};
-
 use self::client::{Client, ClientError};
+use crate::config::{sub::source::SourceType, Config};
+use liferay_object::models::ObjectDefinition;
 
 pub mod client;
 
 pub fn load(config: &Config) -> Result<MetaData, ClientError> {
-    let client = Client::new();
+    let mut client = Client::new();
     let object_def = match config.source.source_type {
         SourceType::SystemObject | SourceType::CustomObject => Some(client.get_def(config)?),
         SourceType::HeadlessApi => None,
@@ -20,8 +18,5 @@ pub fn load(config: &Config) -> Result<MetaData, ClientError> {
 #[derive(Debug)]
 pub struct MetaData {
     pub spec: openapi::Spec,
-    pub object_def: Option<ObjectDef>,
+    pub object_def: Option<ObjectDefinition>,
 }
-
-#[derive(Debug, Deserialize)]
-pub struct ObjectDef;

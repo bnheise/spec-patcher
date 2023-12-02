@@ -7,7 +7,7 @@ use crate::config::file::FileEnvConfig;
 use self::{
     file::{FileEnvConfigError, InnerConfigOpt},
     sub::{
-        connection::{Auth, Connection, ConnectionOpt},
+        connection::{Auth, Connection, ConnectionOpt, TokenAuth},
         source::{Source, SourceOpt},
     },
 };
@@ -54,15 +54,27 @@ impl Config {
         .to_owned();
 
         let auth = match (cli.connection.secret, cli.connection.basic_auth) {
-            (None, Some(basic)) => Auth::Basic(basic),
-            (Some(secret), None) => Auth::OAuth(secret),
+            (None, Some(basic)) => Some(Auth::Basic(basic)),
+            (Some(secret), None) => Some(Auth::OAuth(secret)),
             (Some(_), Some(_)) => Err(ConfigError::AuthConflict)?,
             (None, None) => file
                 .connection
+                .as_ref()
                 .ok_or(ConfigError::MissingAuth)?
                 .secret
-                .map(Auth::OAuth) // TODO: add basic auth from file
-                .ok_or(ConfigError::MissingArg("auth"))?,
+                .as_ref()
+                .map(TokenAuth::to_owned)
+                .map(Auth::OAuth),
+        };
+
+        let auth = match auth {
+            Some(auth) => auth,
+            None => file
+                .connection
+                .ok_or(ConfigError::MissingAuth)?
+                .basic_auth
+                .map(Auth::Basic)
+                .ok_or(ConfigError::MissingAuth)?,
         };
 
         let source_type = match &cli.source.source_type {
