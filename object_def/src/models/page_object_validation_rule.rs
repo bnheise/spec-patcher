@@ -41,3 +41,9 @@ impl PageObjectValidationRule {
         }
     }
 }
+
+impl Default for PageObjectValidationRule {
+    fn default() -> Self {
+        Self::new()
+    }
+}

@@ -34,7 +34,7 @@ pub enum DeleteObjectFolderBatchError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum GetObjectFolderError {
-    DefaultResponse(crate::models::ObjectFolder),
+    DefaultResponse(Box<crate::models::ObjectFolder>),
     UnknownValue(serde_json::Value),
 }
 
@@ -42,7 +42,7 @@ pub enum GetObjectFolderError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum GetObjectFolderByExternalReferenceCodeError {
-    DefaultResponse(crate::models::ObjectFolder),
+    DefaultResponse(Box<crate::models::ObjectFolder>),
     UnknownValue(serde_json::Value),
 }
 
@@ -58,7 +58,7 @@ pub enum GetObjectFoldersPageError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PatchObjectFolderError {
-    DefaultResponse(crate::models::ObjectFolder),
+    DefaultResponse(Box<crate::models::ObjectFolder>),
     UnknownValue(serde_json::Value),
 }
 
@@ -66,7 +66,7 @@ pub enum PatchObjectFolderError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PostObjectFolderError {
-    DefaultResponse(crate::models::ObjectFolder),
+    DefaultResponse(Box<crate::models::ObjectFolder>),
     UnknownValue(serde_json::Value),
 }
 
@@ -90,7 +90,7 @@ pub enum PostObjectFoldersPageExportBatchError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PutObjectFolderError {
-    DefaultResponse(crate::models::ObjectFolder),
+    DefaultResponse(Box<crate::models::ObjectFolder>),
     UnknownValue(serde_json::Value),
 }
 
@@ -106,7 +106,7 @@ pub enum PutObjectFolderBatchError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PutObjectFolderByExternalReferenceCodeError {
-    DefaultResponse(crate::models::ObjectFolder),
+    DefaultResponse(Box<crate::models::ObjectFolder>),
     UnknownValue(serde_json::Value),
 }
 

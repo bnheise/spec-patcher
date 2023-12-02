@@ -83,3 +83,9 @@ impl ObjectAction {
         }
     }
 }
+
+impl Default for ObjectAction {
+    fn default() -> Self {
+        Self::new()
+    }
+}

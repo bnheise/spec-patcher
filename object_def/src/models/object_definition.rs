@@ -164,3 +164,9 @@ impl ObjectDefinition {
         }
     }
 }
+
+impl Default for ObjectDefinition {
+    fn default() -> Self {
+        Self::new()
+    }
+}

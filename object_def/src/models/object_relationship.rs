@@ -105,6 +105,12 @@ impl ObjectRelationship {
     }
 }
 
+impl Default for ObjectRelationship {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 ///
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum DeletionType {

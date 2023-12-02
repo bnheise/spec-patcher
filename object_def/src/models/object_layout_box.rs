@@ -41,6 +41,12 @@ impl ObjectLayoutBox {
     }
 }
 
+impl Default for ObjectLayoutBox {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 ///
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum Type {

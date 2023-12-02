@@ -41,3 +41,9 @@ impl PageObjectView {
         }
     }
 }
+
+impl Default for PageObjectView {
+    fn default() -> Self {
+        Self::new()
+    }
+}

@@ -34,3 +34,9 @@ impl ObjectLayoutRow {
         }
     }
 }
+
+impl Default for ObjectLayoutRow {
+    fn default() -> Self {
+        Self::new()
+    }
+}

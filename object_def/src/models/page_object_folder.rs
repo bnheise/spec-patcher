@@ -41,3 +41,9 @@ impl PageObjectFolder {
         }
     }
 }
+
+impl Default for PageObjectFolder {
+    fn default() -> Self {
+        Self::new()
+    }
+}

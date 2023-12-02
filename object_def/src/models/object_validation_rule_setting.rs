@@ -28,3 +28,9 @@ impl ObjectValidationRuleSetting {
         }
     }
 }
+
+impl Default for ObjectValidationRuleSetting {
+    fn default() -> Self {
+        Self::new()
+    }
+}

@@ -34,3 +34,9 @@ impl ObjectViewColumn {
         }
     }
 }
+
+impl Default for ObjectViewColumn {
+    fn default() -> Self {
+        Self::new()
+    }
+}

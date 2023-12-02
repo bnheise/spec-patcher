@@ -41,3 +41,9 @@ impl PageObjectField {
         }
     }
 }
+
+impl Default for PageObjectField {
+    fn default() -> Self {
+        Self::new()
+    }
+}

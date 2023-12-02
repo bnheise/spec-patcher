@@ -34,3 +34,9 @@ impl ObjectLayoutColumn {
         }
     }
 }
+
+impl Default for ObjectLayoutColumn {
+    fn default() -> Self {
+        Self::new()
+    }
+}

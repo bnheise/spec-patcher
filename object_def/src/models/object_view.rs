@@ -65,3 +65,9 @@ impl ObjectView {
         }
     }
 }
+
+impl Default for ObjectView {
+    fn default() -> Self {
+        Self::new()
+    }
+}

@@ -50,7 +50,7 @@ pub enum GetObjectDefinitionObjectViewsPageError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum GetObjectViewError {
-    DefaultResponse(crate::models::ObjectView),
+    DefaultResponse(Box<crate::models::ObjectView>),
     UnknownValue(serde_json::Value),
 }
 
@@ -58,7 +58,7 @@ pub enum GetObjectViewError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PostObjectDefinitionByExternalReferenceCodeObjectViewError {
-    DefaultResponse(crate::models::ObjectView),
+    DefaultResponse(Box<crate::models::ObjectView>),
     UnknownValue(serde_json::Value),
 }
 
@@ -66,7 +66,7 @@ pub enum PostObjectDefinitionByExternalReferenceCodeObjectViewError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PostObjectDefinitionObjectViewError {
-    DefaultResponse(crate::models::ObjectView),
+    DefaultResponse(Box<crate::models::ObjectView>),
     UnknownValue(serde_json::Value),
 }
 
@@ -90,7 +90,7 @@ pub enum PostObjectDefinitionObjectViewsPageExportBatchError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PostObjectViewCopyError {
-    DefaultResponse(crate::models::ObjectView),
+    DefaultResponse(Box<crate::models::ObjectView>),
     UnknownValue(serde_json::Value),
 }
 
@@ -98,7 +98,7 @@ pub enum PostObjectViewCopyError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PutObjectViewError {
-    DefaultResponse(crate::models::ObjectView),
+    DefaultResponse(Box<crate::models::ObjectView>),
     UnknownValue(serde_json::Value),
 }
 

@@ -40,3 +40,9 @@ impl ObjectLayoutTab {
         }
     }
 }
+
+impl Default for ObjectLayoutTab {
+    fn default() -> Self {
+        Self::new()
+    }
+}

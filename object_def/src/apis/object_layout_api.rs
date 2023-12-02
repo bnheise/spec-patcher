@@ -50,7 +50,7 @@ pub enum GetObjectDefinitionObjectLayoutsPageError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum GetObjectLayoutError {
-    DefaultResponse(crate::models::ObjectLayout),
+    DefaultResponse(Box<crate::models::ObjectLayout>),
     UnknownValue(serde_json::Value),
 }
 
@@ -58,7 +58,7 @@ pub enum GetObjectLayoutError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PostObjectDefinitionByExternalReferenceCodeObjectLayoutError {
-    DefaultResponse(crate::models::ObjectLayout),
+    DefaultResponse(Box<crate::models::ObjectLayout>),
     UnknownValue(serde_json::Value),
 }
 
@@ -66,7 +66,7 @@ pub enum PostObjectDefinitionByExternalReferenceCodeObjectLayoutError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PostObjectDefinitionObjectLayoutError {
-    DefaultResponse(crate::models::ObjectLayout),
+    DefaultResponse(Box<crate::models::ObjectLayout>),
     UnknownValue(serde_json::Value),
 }
 
@@ -90,7 +90,7 @@ pub enum PostObjectDefinitionObjectLayoutsPageExportBatchError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PutObjectLayoutError {
-    DefaultResponse(crate::models::ObjectLayout),
+    DefaultResponse(Box<crate::models::ObjectLayout>),
     UnknownValue(serde_json::Value),
 }
 

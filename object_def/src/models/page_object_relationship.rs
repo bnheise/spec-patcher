@@ -41,3 +41,9 @@ impl PageObjectRelationship {
         }
     }
 }
+
+impl Default for PageObjectRelationship {
+    fn default() -> Self {
+        Self::new()
+    }
+}

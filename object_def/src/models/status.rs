@@ -31,3 +31,9 @@ impl Status {
         }
     }
 }
+
+impl Default for Status {
+    fn default() -> Self {
+        Self::new()
+    }
+}

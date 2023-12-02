@@ -25,3 +25,9 @@ impl Facet {
         }
     }
 }
+
+impl Default for Facet {
+    fn default() -> Self {
+        Self::new()
+    }
+}

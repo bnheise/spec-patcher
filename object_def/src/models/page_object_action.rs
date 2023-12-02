@@ -41,3 +41,9 @@ impl PageObjectAction {
         }
     }
 }
+
+impl Default for PageObjectAction {
+    fn default() -> Self {
+        Self::new()
+    }
+}

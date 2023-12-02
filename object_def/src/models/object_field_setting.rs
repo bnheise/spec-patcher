@@ -34,3 +34,9 @@ impl ObjectFieldSetting {
         }
     }
 }
+
+impl Default for ObjectFieldSetting {
+    fn default() -> Self {
+        Self::new()
+    }
+}

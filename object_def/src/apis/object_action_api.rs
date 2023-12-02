@@ -34,7 +34,7 @@ pub enum DeleteObjectActionBatchError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum GetObjectActionError {
-    DefaultResponse(crate::models::ObjectAction),
+    DefaultResponse(Box<crate::models::ObjectAction>),
     UnknownValue(serde_json::Value),
 }
 
@@ -58,7 +58,7 @@ pub enum GetObjectDefinitionObjectActionsPageError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PatchObjectActionError {
-    DefaultResponse(crate::models::ObjectAction),
+    DefaultResponse(Box<crate::models::ObjectAction>),
     UnknownValue(serde_json::Value),
 }
 
@@ -66,7 +66,7 @@ pub enum PatchObjectActionError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PostObjectDefinitionByExternalReferenceCodeObjectActionError {
-    DefaultResponse(crate::models::ObjectAction),
+    DefaultResponse(Box<crate::models::ObjectAction>),
     UnknownValue(serde_json::Value),
 }
 
@@ -74,7 +74,7 @@ pub enum PostObjectDefinitionByExternalReferenceCodeObjectActionError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PostObjectDefinitionObjectActionError {
-    DefaultResponse(crate::models::ObjectAction),
+    DefaultResponse(Box<crate::models::ObjectAction>),
     UnknownValue(serde_json::Value),
 }
 
@@ -98,7 +98,7 @@ pub enum PostObjectDefinitionObjectActionsPageExportBatchError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PutObjectActionError {
-    DefaultResponse(crate::models::ObjectAction),
+    DefaultResponse(Box<crate::models::ObjectAction>),
     UnknownValue(serde_json::Value),
 }
 

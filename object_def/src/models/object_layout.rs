@@ -56,3 +56,9 @@ impl ObjectLayout {
         }
     }
 }
+
+impl Default for ObjectLayout {
+    fn default() -> Self {
+        Self::new()
+    }
+}

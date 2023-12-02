@@ -35,6 +35,12 @@ impl ObjectViewSortColumn {
     }
 }
 
+impl Default for ObjectViewSortColumn {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 ///
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum SortOrder {

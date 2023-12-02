@@ -41,3 +41,9 @@ impl PageObjectDefinition {
         }
     }
 }
+
+impl Default for PageObjectDefinition {
+    fn default() -> Self {
+        Self::new()
+    }
+}

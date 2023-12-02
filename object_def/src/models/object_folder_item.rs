@@ -40,3 +40,9 @@ impl ObjectFolderItem {
         }
     }
 }
+
+impl Default for ObjectFolderItem {
+    fn default() -> Self {
+        Self::new()
+    }
+}

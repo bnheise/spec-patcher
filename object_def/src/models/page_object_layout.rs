@@ -41,3 +41,9 @@ impl PageObjectLayout {
         }
     }
 }
+
+impl Default for PageObjectLayout {
+    fn default() -> Self {
+        Self::new()
+    }
+}

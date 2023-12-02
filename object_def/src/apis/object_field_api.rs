@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 use reqwest;
 
-use super::{configuration, Error};
+use super::{configuration, Error, Params};
 use crate::apis::ResponseContent;
 
 /// struct for typed errors of method [`delete_object_field`]
@@ -546,16 +546,19 @@ pub async fn post_object_definition_object_field_batch(
     }
 }
 
-pub async fn post_object_definition_object_fields_page_export_batch(
+pub async fn post_object_definition_object_fields_page_export_batch<'a>(
     configuration: &configuration::Configuration,
     object_definition_id: &str,
-    filter: Option<&str>,
-    search: Option<&str>,
-    sort: Option<&str>,
-    callback_url: Option<&str>,
-    content_type: Option<&str>,
-    field_names: Option<&str>,
+    params: Params<'a>,
 ) -> Result<(), Error<PostObjectDefinitionObjectFieldsPageExportBatchError>> {
+    let Params {
+        filter,
+        search,
+        sort,
+        callback_url,
+        content_type,
+        field_names,
+    } = params;
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;

@@ -50,3 +50,9 @@ impl ObjectFolder {
         }
     }
 }
+
+impl Default for ObjectFolder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
