@@ -1,5 +1,6 @@
 use crate::config::{sub::connection::TokenAuth, Config};
 use liferay_object::models::ObjectDefinition;
+use list_type::models::ListTypeDefinition;
 use reqwest::{
     blocking::RequestBuilder,
     header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE},
@@ -54,6 +55,7 @@ impl Client {
         Ok(req)
     }
 
+    /// Load an object definition
     pub fn get_def(&mut self, config: &Config) -> Result<ObjectDefinition, LoadError> {
         let url = Self::format_object_def_url(&config.connection.base_url, &config.source.erc)?;
         let mut req = self.client.get(url);
@@ -66,6 +68,43 @@ impl Client {
 
         res.json()
             .map_err(|e| LoadError::Deserialize(e, "object definition"))
+    }
+
+    pub fn get_picklist(
+        &mut self,
+        config: &Config,
+        erc: &str,
+    ) -> Result<ListTypeDefinition, LoadError> {
+        let url = Self::format_picklist_url(&config.connection.base_url, erc)?;
+        let mut req = self.client.get(url);
+
+        req = self.set_auth(req, config)?;
+
+        let res = req.send().map_err(LoadError::Send)?;
+
+        res.error_for_status_ref()?;
+
+        res.json()
+            .map_err(|e| LoadError::Deserialize(e, "picklist definition"))
+    }
+
+    pub fn get_picklists(&mut self, config: &Config, ercs: Vec<String>) -> Vec<ListTypeDefinition> {
+        let (picklists, errors): (Vec<_>, Vec<_>) = ercs
+            .iter()
+            .map(|erc| self.get_picklist(config, erc))
+            .partition(Result::is_ok);
+
+        let picklists: Vec<_> = picklists.into_iter().map(Result::unwrap).collect();
+        let errors: Vec<_> = errors.into_iter().map(Result::unwrap_err).collect();
+
+        if !errors.is_empty() {
+            println!("Warning: failed to load at least one picklist.")
+        }
+        for error in errors {
+            println!("{error}");
+        }
+
+        picklists
     }
 
     fn format_object_def_url(base_url: &Url, erc: &str) -> Result<Url, LoadError> {
@@ -108,6 +147,14 @@ impl Client {
     fn format_oauth_token_url(base_url: &Url) -> Result<Url, LoadError> {
         let endpoint = "/o/oauth2/token";
         Ok(base_url.join(endpoint)?)
+    }
+
+    fn format_picklist_url(base_url: &Url, erc: &str) -> Result<Url, LoadError> {
+        let endpoint = format!(
+            "/o/headless-admin-list-type/v1.0/list-type-definitions/by-external-reference-code/{erc}"
+        );
+
+        Ok(base_url.join(&endpoint)?)
     }
 }
 

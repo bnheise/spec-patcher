@@ -1,7 +1,6 @@
-use error::CliError;
-use output::output;
-
 use crate::config::Config;
+use error::CliError;
+use patch::patch;
 
 mod config;
 mod error;
@@ -14,7 +13,9 @@ pub fn run() -> Result<(), CliError> {
 
     let metadata = load::load(&config)?;
 
-    output(&config.output, &metadata.spec)?;
+    let spec = patch(&config, metadata);
+
+    output::output(&config.output, &spec)?;
 
     Ok(())
 }

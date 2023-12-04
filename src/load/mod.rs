@@ -1,6 +1,7 @@
 use self::client::Client;
 use crate::config::{sub::source::SourceType, Config};
 use liferay_object::models::ObjectDefinition;
+use list_type::models::ListTypeDefinition;
 use thiserror::Error;
 
 pub mod client;
@@ -12,11 +13,31 @@ pub fn load(config: &Config) -> Result<MetaData, LoadError> {
         SourceType::HeadlessApi => None,
     };
 
-    let endpoint = format_endpoint(&config.source.source_type, object_def.as_ref())?;
+    let picklists = if let Some(object_def) = object_def.as_ref() {
+        let picklists = &object_def.object_fields.as_ref().map(|fields| {
+            let ercs = fields
+                .iter()
+                .filter_map(|field| {
+                    field
+                        .list_type_definition_external_reference_code
+                        .to_owned()
+                })
+                .collect::<Vec<String>>();
+            client.get_picklists(config, ercs)
+        });
+        picklists.to_owned()
+    } else {
+        None
+    };
 
+    let endpoint = format_endpoint(&config.source.source_type, object_def.as_ref())?;
     let spec = client.get_spec(config, endpoint)?;
 
-    Ok(MetaData { spec, object_def })
+    Ok(MetaData {
+        spec,
+        object_def,
+        picklists,
+    })
 }
 
 fn format_endpoint(
@@ -49,6 +70,7 @@ fn format_endpoint(
 pub struct MetaData {
     pub spec: openapi::v3_0::Spec,
     pub object_def: Option<ObjectDefinition>,
+    pub picklists: Option<Vec<ListTypeDefinition>>,
 }
 
 #[derive(Debug, Error)]
