@@ -8,6 +8,7 @@ use self::{
     file::{FileEnvConfigError, InnerConfigOpt},
     sub::{
         connection::{Auth, Connection, ConnectionOpt, TokenAuth},
+        output::Output,
         source::{Source, SourceOpt},
     },
 };
@@ -22,6 +23,8 @@ struct InnerConfig {
     pub connection: ConnectionOpt,
     #[command(flatten)]
     pub source: SourceOpt,
+    #[command(flatten)]
+    pub output: Output,
 }
 
 impl InnerConfig {
@@ -37,6 +40,7 @@ impl InnerConfig {
 pub struct Config {
     pub connection: Connection,
     pub source: Source,
+    pub output: Output,
 }
 
 impl Config {
@@ -101,9 +105,22 @@ impl Config {
         }
         .to_owned();
 
+        let output = match &cli.output.output {
+            Some(output) => Some(output.to_owned()),
+            None => {
+                if let Some(output) = &file.output {
+                    output.output.as_ref().map(|path| path.to_owned())
+                } else {
+                    None
+                }
+            }
+        }
+        .to_owned();
+
         Ok(Config {
             connection: Connection { base_url, auth },
             source: Source { source_type, erc },
+            output: Output { output },
         })
     }
 

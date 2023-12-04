@@ -1,15 +1,13 @@
-use crate::config::{
-    sub::connection::{Auth, TokenAuth},
-    Config,
-};
+use crate::config::{sub::connection::TokenAuth, Config};
 use liferay_object::models::ObjectDefinition;
 use reqwest::{
     blocking::RequestBuilder,
     header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE},
 };
 use serde::{Deserialize, Serialize};
-use thiserror::Error;
 use url::Url;
+
+use super::LoadError;
 
 #[derive(Debug, Clone)]
 pub struct Client {
@@ -29,20 +27,20 @@ impl Client {
         &mut self,
         config: &Config,
         endpoint: String,
-    ) -> Result<openapi::Spec, ClientError> {
+    ) -> Result<openapi::v3_0::Spec, LoadError> {
         let mut req = self.client.get(config.connection.base_url.join(&endpoint)?);
         req = self.set_auth(req, config)?;
         req.send()
-            .map_err(ClientError::Send)?
+            .map_err(LoadError::Send)?
             .json()
-            .map_err(|e| ClientError::Deserialize(e, "openapi spec"))
+            .map_err(|e| LoadError::Deserialize(e, "openapi spec"))
     }
 
     fn set_auth(
         &mut self,
         req: RequestBuilder,
         config: &Config,
-    ) -> Result<RequestBuilder, ClientError> {
+    ) -> Result<RequestBuilder, LoadError> {
         let req = match &config.connection.auth {
             crate::config::sub::connection::Auth::Basic(basic) => {
                 req.basic_auth(basic.username.to_owned(), Some(basic.password.to_owned()))
@@ -56,39 +54,35 @@ impl Client {
         Ok(req)
     }
 
-    pub fn get_def(&mut self, config: &Config) -> Result<ObjectDefinition, ClientError> {
+    pub fn get_def(&mut self, config: &Config) -> Result<ObjectDefinition, LoadError> {
         let url = Self::format_object_def_url(&config.connection.base_url, &config.source.erc)?;
         let mut req = self.client.get(url);
 
         req = self.set_auth(req, config)?;
 
-        let res = req.send().map_err(ClientError::Send)?;
+        let res = req.send().map_err(LoadError::Send)?;
 
         res.error_for_status_ref()?;
 
         res.json()
-            .map_err(|e| ClientError::Deserialize(e, "object definition"))
+            .map_err(|e| LoadError::Deserialize(e, "object definition"))
     }
 
-    fn format_object_def_url(base_url: &Url, erc: &str) -> Result<Url, ClientError> {
+    fn format_object_def_url(base_url: &Url, erc: &str) -> Result<Url, LoadError> {
         let endpoint =
             format!("/o/object-admin/v1.0/object-definitions/by-external-reference-code/{erc}");
 
         Ok(base_url.join(&endpoint)?)
     }
 
-    fn get_token(&mut self, config: &Config, bearer: &TokenAuth) -> Result<&str, ClientError> {
+    fn get_token(&mut self, config: &Config, bearer: &TokenAuth) -> Result<&str, LoadError> {
         if self.token.is_none() {
             self.token = Some(self.fetch_token(config, bearer)?);
         }
         Ok(&self.token.as_ref().expect("should never fail").access_token)
     }
 
-    fn fetch_token(
-        &self,
-        config: &Config,
-        bearer: &TokenAuth,
-    ) -> Result<TokenResponse, ClientError> {
+    fn fetch_token(&self, config: &Config, bearer: &TokenAuth) -> Result<TokenResponse, LoadError> {
         let token_params = TokenParams {
             grant_type: GrantType::ClientCredentials,
             client_id: bearer.client_id.to_owned(),
@@ -111,7 +105,7 @@ impl Client {
         Ok(res.json()?)
     }
 
-    fn format_oauth_token_url(base_url: &Url) -> Result<Url, ClientError> {
+    fn format_oauth_token_url(base_url: &Url) -> Result<Url, LoadError> {
         let endpoint = "/o/oauth2/token";
         Ok(base_url.join(endpoint)?)
     }
@@ -141,16 +135,4 @@ enum TokenType {
 #[serde(rename_all = "snake_case")]
 enum GrantType {
     ClientCredentials,
-}
-
-#[derive(Debug, Error)]
-pub enum ClientError {
-    #[error("Http request failed: {0}")]
-    Send(#[from] reqwest::Error),
-    #[error("Failed to deserialize response: {0}")]
-    Deserialize(reqwest::Error, &'static str),
-    #[error("Failed to format request url")]
-    UrlFormat(#[from] url::ParseError),
-    #[error("Missing required field from API response: {0}")]
-    MissingField(&'static str),
 }

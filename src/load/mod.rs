@@ -1,10 +1,11 @@
-use self::client::{Client, ClientError};
+use self::client::Client;
 use crate::config::{sub::source::SourceType, Config};
 use liferay_object::models::ObjectDefinition;
+use thiserror::Error;
 
 pub mod client;
 
-pub fn load(config: &Config) -> Result<MetaData, ClientError> {
+pub fn load(config: &Config) -> Result<MetaData, LoadError> {
     let mut client = Client::new();
     let object_def = match config.source.source_type {
         SourceType::SystemObject | SourceType::CustomObject => Some(client.get_def(config)?),
@@ -15,19 +16,18 @@ pub fn load(config: &Config) -> Result<MetaData, ClientError> {
 
     let spec = client.get_spec(config, endpoint)?;
 
-    dbg!(spec);
-    todo!()
+    Ok(MetaData { spec, object_def })
 }
 
 fn format_endpoint(
     source_type: &SourceType,
     object_def: Option<&ObjectDefinition>,
-) -> Result<String, ClientError> {
+) -> Result<String, LoadError> {
     let endpoint = if let Some(object_def) = &object_def {
         let path = object_def
             .rest_context_path
             .as_ref()
-            .ok_or(ClientError::MissingField("rest_context_path"))?;
+            .ok_or(LoadError::MissingField("rest_context_path"))?;
         match source_type {
             SourceType::SystemObject => format!("{path}/openapi.json"),
             SourceType::CustomObject => {
@@ -47,6 +47,18 @@ fn format_endpoint(
 
 #[derive(Debug)]
 pub struct MetaData {
-    pub spec: openapi::Spec,
+    pub spec: openapi::v3_0::Spec,
     pub object_def: Option<ObjectDefinition>,
+}
+
+#[derive(Debug, Error)]
+pub enum LoadError {
+    #[error("Http request failed: {0}")]
+    Send(#[from] reqwest::Error),
+    #[error("Failed to deserialize response: {0}")]
+    Deserialize(reqwest::Error, &'static str),
+    #[error("Failed to format request url")]
+    UrlFormat(#[from] url::ParseError),
+    #[error("Missing required field from API response: {0}")]
+    MissingField(&'static str),
 }

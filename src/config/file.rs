@@ -2,7 +2,7 @@ use config::ConfigError;
 use serde::Deserialize;
 use thiserror::Error;
 
-use super::sub::{connection::ConnectionOpt, source::SourceOpt};
+use super::sub::{connection::ConnectionOpt, output::Output, source::SourceOpt};
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct FileEnvConfig(InnerConfigOpt);
@@ -11,6 +11,7 @@ pub struct FileEnvConfig(InnerConfigOpt);
 pub struct InnerConfigOpt {
     pub connection: Option<ConnectionOpt>,
     pub source: Option<SourceOpt>,
+    pub output: Option<Output>,
 }
 
 impl FileEnvConfig {
