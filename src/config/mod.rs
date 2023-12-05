@@ -1,5 +1,6 @@
 use clap::Parser;
 use serde::Deserialize;
+use url::Url;
 
 use crate::config::file::FileEnvConfig;
 
@@ -8,6 +9,7 @@ use self::{
     sub::{
         connection::{Auth, Connection, ConnectionOpt, TokenAuth},
         output::Output,
+        patch::{InnerCase, Patch, PatchOpt},
         source::{Source, SourceOpt},
     },
 };
@@ -29,6 +31,8 @@ struct InnerConfig {
     pub source: SourceOpt,
     #[command(flatten)]
     pub output: Output,
+    #[command(flatten)]
+    pub patch: PatchOpt,
 }
 
 impl InnerConfig {
@@ -49,6 +53,7 @@ pub struct Config {
     pub connection: Connection,
     pub source: Source,
     pub output: Output,
+    pub patch: Patch,
 }
 
 impl Config {
@@ -68,17 +73,7 @@ impl Config {
     /// argument, this is even more explicit than a config file and so overwrites the
     /// same setting even if it was already defined there.
     fn try_merge(cli: InnerConfig, file: InnerConfigOpt) -> Result<Self, Error> {
-        let base_url = match &cli.connection.base_url {
-            Some(url) => url,
-            None => file
-                .connection
-                .as_ref()
-                .ok_or(Error::MissingArg("url"))?
-                .base_url
-                .as_ref()
-                .ok_or(Error::MissingArg("url"))?,
-        }
-        .to_owned();
+        let base_url = Self::merge_base_url(&cli, &file)?;
 
         let auth = match (cli.connection.secret, cli.connection.basic_auth) {
             (None, Some(basic)) => Some(Auth::Basic(basic)),
@@ -140,11 +135,43 @@ impl Config {
         }
         .to_owned();
 
+        let enum_case = match &cli.patch.enum_case {
+            Some(case) => *case,
+            None => file
+                .patch
+                .as_ref()
+                .ok_or(Error::MissingArg("enum_case"))?
+                .enum_case
+                .as_ref()
+                .map(InnerCase::to_owned)
+                .unwrap_or_default(),
+        }
+        .to_owned();
+
         Ok(Config {
             connection: Connection { base_url, auth },
             source: Source { source_type, erc },
             output: Output { output },
+            patch: Patch { enum_case },
         })
+    }
+
+    /// Extract the base_url parameters from the config sources and returns
+    /// the one with the highest precedence
+    fn merge_base_url(cli: &InnerConfig, file: &InnerConfigOpt) -> Result<Url, Error> {
+        let res = match &cli.connection.base_url {
+            Some(url) => url,
+            None => file
+                .connection
+                .as_ref()
+                .ok_or(Error::MissingArg("url"))?
+                .base_url
+                .as_ref()
+                .ok_or(Error::MissingArg("url"))?,
+        }
+        .to_owned();
+
+        Ok(res)
     }
 
     /// Initialize the configuration via a combination of command line arguments,
@@ -153,6 +180,3 @@ impl Config {
         InnerConfig::init()
     }
 }
-
-#[cfg(test)]
-mod test {}

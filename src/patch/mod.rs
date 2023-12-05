@@ -7,10 +7,10 @@ mod error;
 mod picklist;
 pub use error::Error;
 
-pub fn patch(_config: &Config, metadata: MetaData) -> Spec {
+pub fn patch(config: &Config, metadata: MetaData) -> Spec {
     let mut spec = metadata.spec;
     if let Some(picklists) = metadata.picklists {
-        gen_picklist_enums(picklists, &mut spec);
+        gen_picklist_enums(config, picklists, &mut spec);
     }
 
     spec

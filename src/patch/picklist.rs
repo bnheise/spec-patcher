@@ -1,13 +1,15 @@
+use crate::config::Config;
+
 use super::Error;
-use convert_case::{Case, Casing};
+use convert_case::Casing;
 use list_type::models::ListTypeDefinition;
 use openapi::v3_0::{Components, ObjectOrReference, Schema, Spec};
 use std::collections::BTreeMap;
 
-pub fn gen_picklist_enums(picklists: Vec<ListTypeDefinition>, spec: &mut Spec) {
+pub fn gen_picklist_enums(config: &Config, picklists: Vec<ListTypeDefinition>, spec: &mut Spec) {
     let (enums, errors): (Vec<_>, Vec<_>) = picklists
         .into_iter()
-        .map(picklist_to_enum)
+        .map(picklist_to_enum(config))
         .partition(Result::is_ok);
 
     let enums: Vec<_> = enums.into_iter().flat_map(Result::unwrap).collect();
@@ -32,17 +34,21 @@ pub fn gen_picklist_enums(picklists: Vec<ListTypeDefinition>, spec: &mut Spec) {
     });
 }
 
-pub fn picklist_to_enum(picklist: ListTypeDefinition) -> Result<[(String, Schema); 3], Error> {
-    let erc = picklist
-        .external_reference_code
-        .as_ref()
-        .ok_or(Error::MissingField("externalReferenceCode"))?
-        .to_case(Case::Camel); // <-- TODO: Make case configurable
+pub fn picklist_to_enum(
+    config: &Config,
+) -> impl Fn(ListTypeDefinition) -> Result<[(String, Schema); 3], Error> + '_ {
+    |picklist: ListTypeDefinition| {
+        let erc = picklist
+            .external_reference_code
+            .as_ref()
+            .ok_or(Error::MissingField("externalReferenceCode"))?
+            .to_case(config.patch.enum_case.into());
 
-    let erc_enum = build_erc_enum(&picklist, &erc)?;
-    let key_enum = build_key_enum(&picklist, &erc)?;
-    let item = build_item(&erc);
-    Ok([erc_enum, key_enum, item])
+        let erc_enum = build_erc_enum(&picklist, &erc)?;
+        let key_enum = build_key_enum(&picklist, &erc)?;
+        let item = build_item(&erc);
+        Ok([erc_enum, key_enum, item])
+    }
 }
 
 fn build_erc_enum(picklist: &ListTypeDefinition, erc: &str) -> Result<(String, Schema), Error> {
