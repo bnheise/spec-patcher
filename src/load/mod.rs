@@ -1,11 +1,16 @@
 use self::client::Client;
-use crate::config::{sub::source::SourceType, Config};
+use crate::{
+    config::{sub::source::SourceType, Config},
+    object,
+};
 use liferay_object::models::ObjectDefinition;
 use list_type::models::ListTypeDefinition;
 
 pub mod client;
 mod error;
 pub use error::Error;
+mod extract;
+mod format;
 
 pub fn load(config: &Config) -> Result<MetaData, Error> {
     let mut client = Client::new();
@@ -15,18 +20,9 @@ pub fn load(config: &Config) -> Result<MetaData, Error> {
     };
 
     let picklists = if let Some(object_def) = object_def.as_ref() {
-        let picklists = &object_def.object_fields.as_ref().map(|fields| {
-            let ercs = fields
-                .iter()
-                .filter_map(|field| {
-                    field
-                        .list_type_definition_external_reference_code
-                        .to_owned()
-                })
-                .collect::<Vec<String>>();
-            client.get_picklists(config, ercs)
-        });
-        picklists.to_owned()
+        let ercs = object::extract::picklist_ercs(object_def);
+        let picklists = client.get_picklists(config, ercs);
+        Some(picklists)
     } else {
         None
     };
@@ -67,6 +63,8 @@ fn format_endpoint(
     Ok(endpoint)
 }
 
+/// The collection of data extracted from Liferay that is needed to
+/// perform patching of the open api spec
 #[derive(Debug)]
 pub struct MetaData {
     pub spec: openapi::v3_0::Spec,

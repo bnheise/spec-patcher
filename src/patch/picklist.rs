@@ -6,6 +6,10 @@ use list_type::models::ListTypeDefinition;
 use openapi::v3_0::{Components, ObjectOrReference, Schema, Spec};
 use std::collections::BTreeMap;
 
+/// Open api specification allows defining enums, which are very useful when handling picklist
+/// inputs. However, Liferay's open api specification completely ignores this feature and instead
+/// models picklists as raw strings. This patch fixes this issue by converting picklist values
+/// to openapi enums.
 pub fn gen_picklist_enums(config: &Config, picklists: Vec<ListTypeDefinition>, spec: &mut Spec) {
     let (enums, errors): (Vec<_>, Vec<_>) = picklists
         .into_iter()

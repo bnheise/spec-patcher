@@ -9,10 +9,10 @@ use reqwest::{
     header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE},
 };
 use serde::{Deserialize, Serialize};
-use url::Url;
 
-use super::error::Error;
+use super::{error::Error, format};
 
+/// A Liferay api client
 #[derive(Debug, Clone)]
 pub struct Client {
     client: reqwest::blocking::Client,
@@ -27,6 +27,7 @@ impl Client {
         }
     }
 
+    /// Load an open api specification from a remote Liferay instance
     pub fn get_spec(
         &mut self,
         config: &Config,
@@ -40,6 +41,7 @@ impl Client {
             .map_err(|e| Error::Deserialize(e, "openapi spec"))
     }
 
+    /// Set the internal auth configuration for the client
     fn set_auth(&mut self, req: RequestBuilder, config: &Config) -> Result<RequestBuilder, Error> {
         let req = match &config.connection.auth {
             crate::config::sub::connection::Auth::Basic(basic) => {
@@ -54,9 +56,9 @@ impl Client {
         Ok(req)
     }
 
-    /// Load an object definition
+    /// Load an object definition from a remote Liferay instance
     pub fn get_def(&mut self, config: &Config) -> Result<ObjectDefinition, Error> {
-        let url = Self::format_object_def_url(&config.connection.base_url, &config.source.erc)?;
+        let url = format::object_def_url(&config.connection.base_url, &config.source.erc)?;
         let mut req = self.client.get(url);
 
         req = self.set_auth(req, config)?;
@@ -69,12 +71,13 @@ impl Client {
             .map_err(|e| Error::Deserialize(e, "object definition"))
     }
 
+    /// Load a picklist definition from a remote Liferay instance
     pub fn get_picklist(
         &mut self,
         config: &Config,
         erc: &str,
     ) -> Result<ListTypeDefinition, Error> {
-        let url = Self::format_picklist_url(&config.connection.base_url, erc)?;
+        let url = format::picklist_url(&config.connection.base_url, erc)?;
         let mut req = self.client.get(url);
 
         req = self.set_auth(req, config)?;
@@ -87,6 +90,7 @@ impl Client {
             .map_err(|e| Error::Deserialize(e, "picklist definition"))
     }
 
+    /// Load a set of picklists from a remote Liferay instance
     pub fn get_picklists(&mut self, config: &Config, ercs: Vec<String>) -> Vec<ListTypeDefinition> {
         let (picklists, errors): (Vec<_>, Vec<_>) = ercs
             .iter()
@@ -103,13 +107,8 @@ impl Client {
         picklists
     }
 
-    fn format_object_def_url(base_url: &Url, erc: &str) -> Result<Url, Error> {
-        let endpoint =
-            format!("/o/object-admin/v1.0/object-definitions/by-external-reference-code/{erc}");
-
-        Ok(base_url.join(&endpoint)?)
-    }
-
+    /// Get an oauth token from a remote Liferay instance if it hasn't been fetched yet.
+    /// Otherwise, fetch it.
     fn get_token(&mut self, config: &Config, bearer: &TokenAuth) -> Result<&str, Error> {
         if self.token.is_none() {
             self.token = Some(self.fetch_token(config, bearer)?);
@@ -117,6 +116,7 @@ impl Client {
         Ok(&self.token.as_ref().expect("should never fail").access_token)
     }
 
+    /// Fetch an oauth token from a remote Liferay instance
     fn fetch_token(&self, config: &Config, bearer: &TokenAuth) -> Result<TokenResponse, Error> {
         let token_params = TokenParams {
             grant_type: GrantType::ClientCredentials,
@@ -131,7 +131,7 @@ impl Client {
             HeaderValue::from_static("application/x-www-form-urlencoded; charset=utf-8"),
         );
 
-        let url = Self::format_oauth_token_url(&config.connection.base_url)?;
+        let url = format::oauth_token_url(&config.connection.base_url)?;
         let req = self.client.post(url).headers(headers).query(&token_params);
 
         let res = req.send()?;
@@ -139,21 +139,9 @@ impl Client {
 
         Ok(res.json()?)
     }
-
-    fn format_oauth_token_url(base_url: &Url) -> Result<Url, Error> {
-        let endpoint = "/o/oauth2/token";
-        Ok(base_url.join(endpoint)?)
-    }
-
-    fn format_picklist_url(base_url: &Url, erc: &str) -> Result<Url, Error> {
-        let endpoint = format!(
-            "/o/headless-admin-list-type/v1.0/list-type-definitions/by-external-reference-code/{erc}"
-        );
-
-        Ok(base_url.join(&endpoint)?)
-    }
 }
 
+/// Params for retrieving an oauth token from a remote Liferay instance
 #[derive(Debug, Clone, PartialEq, Serialize)]
 
 struct TokenParams {
@@ -162,6 +150,7 @@ struct TokenParams {
     client_secret: String,
 }
 
+/// The response data from an oauth token response
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 struct TokenResponse {
     access_token: String,
@@ -169,11 +158,13 @@ struct TokenResponse {
     expires_in: usize,
 }
 
+/// Enum representing different types of oauth tokens
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 enum TokenType {
     Bearer,
 }
 
+/// Enum representing different types of oauth grant types
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 enum GrantType {

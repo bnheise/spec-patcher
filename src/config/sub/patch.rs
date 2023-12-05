@@ -5,7 +5,7 @@ use serde::Deserialize;
 #[derive(Debug, Clone, Args, Deserialize)]
 pub struct PatchOpt {
     #[arg(value_enum, long = "enum_case")]
-    pub enum_case: Option<InnerCase>,
+    pub enum_case: Option<InnerCase>, // TODO: allow configuration to let users not generate picklist enums
 }
 
 #[derive(Debug, Deserialize, Clone, Copy, Default, ValueEnum, PartialEq)]

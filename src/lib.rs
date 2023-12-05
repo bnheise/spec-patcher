@@ -5,6 +5,7 @@ use patch::patch;
 mod config;
 pub mod error;
 mod load;
+pub mod object;
 mod output;
 mod patch;
 
