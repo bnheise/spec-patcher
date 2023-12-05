@@ -1,4 +1,7 @@
-use crate::config::{sub::connection::TokenAuth, Config};
+use crate::{
+    config::{sub::connection::TokenAuth, Config},
+    error::Reporter,
+};
 use liferay_object::models::ObjectDefinition;
 use list_type::models::ListTypeDefinition;
 use reqwest::{
@@ -93,11 +96,8 @@ impl Client {
         let picklists: Vec<_> = picklists.into_iter().map(Result::unwrap).collect();
         let errors: Vec<_> = errors.into_iter().map(Result::unwrap_err).collect();
 
-        if !errors.is_empty() {
-            println!("Warning: failed to load at least one picklist.")
-        }
         for error in errors {
-            println!("{error}");
+            error.report("WARNING: failed to load picklist")
         }
 
         picklists

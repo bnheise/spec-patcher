@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::{config::Config, error::Reporter};
 
 use super::Error;
 use convert_case::Casing;
@@ -15,12 +15,8 @@ pub fn gen_picklist_enums(config: &Config, picklists: Vec<ListTypeDefinition>, s
     let enums: Vec<_> = enums.into_iter().flat_map(Result::unwrap).collect();
     let errors: Vec<_> = errors.into_iter().map(Result::unwrap_err).collect();
 
-    if !errors.is_empty() {
-        println!("Warning: failed to create some enums");
-    }
-
     for error in errors {
-        println!("{error}");
+        error.report("WARNING: failed to convert picklist to enum");
     }
 
     let schemas = spec

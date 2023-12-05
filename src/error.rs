@@ -16,9 +16,9 @@ pub enum CliError {
     Patch(#[from] patch::Error),
 }
 
-impl CliError {
-    pub fn report(&self) {
-        println!("\nERROR: Failed to execute operation");
+pub trait Reporter: Error {
+    fn report(&self, header: &'static str) {
+        println!("\n{header}");
         println!("{self}");
         let mut source = self.source();
         while let Some(s) = source {
@@ -27,3 +27,5 @@ impl CliError {
         }
     }
 }
+
+impl Reporter for CliError {}

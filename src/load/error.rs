@@ -1,5 +1,7 @@
 use thiserror::Error;
 
+use crate::error::Reporter;
+
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("Http request failed")]
@@ -11,3 +13,5 @@ pub enum Error {
     #[error("Missing required field from API response: {0}")]
     MissingField(&'static str),
 }
+
+impl Reporter for Error {}

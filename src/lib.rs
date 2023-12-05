@@ -3,7 +3,7 @@ use error::CliError;
 use patch::patch;
 
 mod config;
-mod error;
+pub mod error;
 mod load;
 mod output;
 mod patch;
