@@ -1,11 +1,10 @@
 use clap::Parser;
 use serde::Deserialize;
-use thiserror::Error;
 
 use crate::config::file::FileEnvConfig;
 
 use self::{
-    file::{FileEnvConfigError, InnerConfigOpt},
+    file::InnerConfigOpt,
     sub::{
         connection::{Auth, Connection, ConnectionOpt, TokenAuth},
         output::Output,
@@ -13,9 +12,14 @@ use self::{
     },
 };
 
+mod error;
 mod file;
 pub mod sub;
+pub use error::Error;
 
+/// Private struct use for initializing parameters entered from the command
+/// line. These results will be merged with parameters derived from files
+/// or environment variables into the final [Config].
 #[derive(Debug, Parser, Deserialize, Clone)]
 #[command(author, version, about, long_about = None)]
 struct InnerConfig {
@@ -28,7 +32,9 @@ struct InnerConfig {
 }
 
 impl InnerConfig {
-    pub fn init() -> Result<Config, ConfigError> {
+    /// Initialize the command line config and the [FileEnvConfig], then merge
+    /// them together to create the final [Config].
+    pub fn init() -> Result<Config, Error> {
         let file_args = FileEnvConfig::init()?;
         let cli_args = Self::parse();
 
@@ -36,6 +42,8 @@ impl InnerConfig {
     }
 }
 
+/// Contains the configuration settings for loading, patching, and outputting the
+/// open api specification.
 #[derive(Debug, Clone, Deserialize)]
 pub struct Config {
     pub connection: Connection,
@@ -44,27 +52,42 @@ pub struct Config {
 }
 
 impl Config {
-    fn try_merge(cli: InnerConfig, file: InnerConfigOpt) -> Result<Self, ConfigError> {
+    /// Attempts to merge the settings taken from the command line, a config file, and
+    /// environment variables. The precedence goes in the following order, where lower
+    /// numbers overwrite larger numbers:
+    ///
+    /// 1. command line
+    /// 2. config file
+    /// 3. environment variable
+    ///
+    /// The purpose of this ordering is that we want the most explicitly set parameters
+    /// to take precedence. Therefore, if a setting was configured as an environment
+    /// variable, but a config file exists that also provides the parameter, then the config
+    /// file takes precedence because a config file is more explicit than an environment
+    /// variable. By the same token, if the user provided an input via a command line
+    /// argument, this is even more explicit than a config file and so overwrites the
+    /// same setting even if it was already defined there.
+    fn try_merge(cli: InnerConfig, file: InnerConfigOpt) -> Result<Self, Error> {
         let base_url = match &cli.connection.base_url {
             Some(url) => url,
             None => file
                 .connection
                 .as_ref()
-                .ok_or(ConfigError::MissingArg("url"))?
+                .ok_or(Error::MissingArg("url"))?
                 .base_url
                 .as_ref()
-                .ok_or(ConfigError::MissingArg("url"))?,
+                .ok_or(Error::MissingArg("url"))?,
         }
         .to_owned();
 
         let auth = match (cli.connection.secret, cli.connection.basic_auth) {
             (None, Some(basic)) => Some(Auth::Basic(basic)),
             (Some(secret), None) => Some(Auth::OAuth(secret)),
-            (Some(_), Some(_)) => Err(ConfigError::AuthConflict)?,
+            (Some(_), Some(_)) => Err(Error::AuthConflict)?,
             (None, None) => file
                 .connection
                 .as_ref()
-                .ok_or(ConfigError::MissingAuth)?
+                .ok_or(Error::MissingAuth)?
                 .secret
                 .as_ref()
                 .map(TokenAuth::to_owned)
@@ -75,10 +98,10 @@ impl Config {
             Some(auth) => auth,
             None => file
                 .connection
-                .ok_or(ConfigError::MissingAuth)?
+                .ok_or(Error::MissingAuth)?
                 .basic_auth
                 .map(Auth::Basic)
-                .ok_or(ConfigError::MissingAuth)?,
+                .ok_or(Error::MissingAuth)?,
         };
 
         let source_type = match &cli.source.source_type {
@@ -86,10 +109,10 @@ impl Config {
             None => file
                 .source
                 .as_ref()
-                .ok_or(ConfigError::MissingArg("source"))?
+                .ok_or(Error::MissingArg("source"))?
                 .source_type
                 .as_ref()
-                .ok_or(ConfigError::MissingArg("source"))?,
+                .ok_or(Error::MissingArg("source"))?,
         }
         .to_owned();
 
@@ -98,10 +121,10 @@ impl Config {
             None => file
                 .source
                 .as_ref()
-                .ok_or(ConfigError::MissingArg("erc"))?
+                .ok_or(Error::MissingArg("erc"))?
                 .erc
                 .as_ref()
-                .ok_or(ConfigError::MissingArg("erc"))?,
+                .ok_or(Error::MissingArg("erc"))?,
         }
         .to_owned();
 
@@ -124,19 +147,12 @@ impl Config {
         })
     }
 
-    pub fn init() -> Result<Self, ConfigError> {
+    /// Initialize the configuration via a combination of command line arguments,
+    /// environment variables, and parameters from a config file
+    pub fn init() -> Result<Self, Error> {
         InnerConfig::init()
     }
 }
 
-#[derive(Debug, Error)]
-pub enum ConfigError {
-    #[error("Failed to initialize settings from config file:\n\t{0}")]
-    FileConfig(#[from] FileEnvConfigError),
-    #[error("Missing required argument: {0}")]
-    MissingArg(&'static str),
-    #[error("Please provide authentication by either providing an oauth secret or a username and password")]
-    MissingAuth,
-    #[error("You have provided both an oauth secret and basic auth credentials. Please chooseo only one")]
-    AuthConflict,
-}
+#[cfg(test)]
+mod test {}

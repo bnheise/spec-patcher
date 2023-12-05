@@ -1,13 +1,29 @@
+use crate::{config, patch};
+use crate::{load, output};
+use std::error::Error;
 use thiserror::Error;
 
-use crate::{config::ConfigError, load::LoadError, output::OutputError};
-
+/// Represents all errors that may arise when running application
 #[derive(Debug, Error)]
 pub enum CliError {
-    #[error("Failed to initialize: {0}")]
-    Initialize(#[from] ConfigError),
-    #[error("Failed to load spec: {0}")]
-    Load(#[from] LoadError),
+    #[error("Failed to initialize")]
+    Initialize(#[from] config::Error),
+    #[error("Failed to load spec")]
+    Load(#[from] load::Error),
     #[error("Failed to output open api spec")]
-    Output(#[from] OutputError),
+    Output(#[from] output::Error),
+    #[error("Failed to patch openapi spec")]
+    Patch(#[from] patch::Error),
+}
+
+impl CliError {
+    pub fn report(&self) {
+        println!("\nERROR: Failed to execute operation");
+        println!("{self}");
+        let mut source = self.source();
+        while let Some(s) = source {
+            println!("\t{s}");
+            source = s.source();
+        }
+    }
 }

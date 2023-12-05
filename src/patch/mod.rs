@@ -3,8 +3,9 @@ use openapi::v3_0::Spec;
 
 use self::picklist::gen_picklist_enums;
 
-pub mod error;
+mod error;
 mod picklist;
+pub use error::Error;
 
 pub fn patch(_config: &Config, metadata: MetaData) -> Spec {
     let mut spec = metadata.spec;

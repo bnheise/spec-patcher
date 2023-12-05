@@ -8,7 +8,7 @@ use reqwest::{
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use super::LoadError;
+use super::error::Error;
 
 #[derive(Debug, Clone)]
 pub struct Client {
@@ -28,20 +28,16 @@ impl Client {
         &mut self,
         config: &Config,
         endpoint: String,
-    ) -> Result<openapi::v3_0::Spec, LoadError> {
+    ) -> Result<openapi::v3_0::Spec, Error> {
         let mut req = self.client.get(config.connection.base_url.join(&endpoint)?);
         req = self.set_auth(req, config)?;
         req.send()
-            .map_err(LoadError::Send)?
+            .map_err(Error::Send)?
             .json()
-            .map_err(|e| LoadError::Deserialize(e, "openapi spec"))
+            .map_err(|e| Error::Deserialize(e, "openapi spec"))
     }
 
-    fn set_auth(
-        &mut self,
-        req: RequestBuilder,
-        config: &Config,
-    ) -> Result<RequestBuilder, LoadError> {
+    fn set_auth(&mut self, req: RequestBuilder, config: &Config) -> Result<RequestBuilder, Error> {
         let req = match &config.connection.auth {
             crate::config::sub::connection::Auth::Basic(basic) => {
                 req.basic_auth(basic.username.to_owned(), Some(basic.password.to_owned()))
@@ -56,36 +52,36 @@ impl Client {
     }
 
     /// Load an object definition
-    pub fn get_def(&mut self, config: &Config) -> Result<ObjectDefinition, LoadError> {
+    pub fn get_def(&mut self, config: &Config) -> Result<ObjectDefinition, Error> {
         let url = Self::format_object_def_url(&config.connection.base_url, &config.source.erc)?;
         let mut req = self.client.get(url);
 
         req = self.set_auth(req, config)?;
 
-        let res = req.send().map_err(LoadError::Send)?;
+        let res = req.send().map_err(Error::Send)?;
 
         res.error_for_status_ref()?;
 
         res.json()
-            .map_err(|e| LoadError::Deserialize(e, "object definition"))
+            .map_err(|e| Error::Deserialize(e, "object definition"))
     }
 
     pub fn get_picklist(
         &mut self,
         config: &Config,
         erc: &str,
-    ) -> Result<ListTypeDefinition, LoadError> {
+    ) -> Result<ListTypeDefinition, Error> {
         let url = Self::format_picklist_url(&config.connection.base_url, erc)?;
         let mut req = self.client.get(url);
 
         req = self.set_auth(req, config)?;
 
-        let res = req.send().map_err(LoadError::Send)?;
+        let res = req.send().map_err(Error::Send)?;
 
         res.error_for_status_ref()?;
 
         res.json()
-            .map_err(|e| LoadError::Deserialize(e, "picklist definition"))
+            .map_err(|e| Error::Deserialize(e, "picklist definition"))
     }
 
     pub fn get_picklists(&mut self, config: &Config, ercs: Vec<String>) -> Vec<ListTypeDefinition> {
@@ -107,21 +103,21 @@ impl Client {
         picklists
     }
 
-    fn format_object_def_url(base_url: &Url, erc: &str) -> Result<Url, LoadError> {
+    fn format_object_def_url(base_url: &Url, erc: &str) -> Result<Url, Error> {
         let endpoint =
             format!("/o/object-admin/v1.0/object-definitions/by-external-reference-code/{erc}");
 
         Ok(base_url.join(&endpoint)?)
     }
 
-    fn get_token(&mut self, config: &Config, bearer: &TokenAuth) -> Result<&str, LoadError> {
+    fn get_token(&mut self, config: &Config, bearer: &TokenAuth) -> Result<&str, Error> {
         if self.token.is_none() {
             self.token = Some(self.fetch_token(config, bearer)?);
         }
         Ok(&self.token.as_ref().expect("should never fail").access_token)
     }
 
-    fn fetch_token(&self, config: &Config, bearer: &TokenAuth) -> Result<TokenResponse, LoadError> {
+    fn fetch_token(&self, config: &Config, bearer: &TokenAuth) -> Result<TokenResponse, Error> {
         let token_params = TokenParams {
             grant_type: GrantType::ClientCredentials,
             client_id: bearer.client_id.to_owned(),
@@ -144,12 +140,12 @@ impl Client {
         Ok(res.json()?)
     }
 
-    fn format_oauth_token_url(base_url: &Url) -> Result<Url, LoadError> {
+    fn format_oauth_token_url(base_url: &Url) -> Result<Url, Error> {
         let endpoint = "/o/oauth2/token";
         Ok(base_url.join(endpoint)?)
     }
 
-    fn format_picklist_url(base_url: &Url, erc: &str) -> Result<Url, LoadError> {
+    fn format_picklist_url(base_url: &Url, erc: &str) -> Result<Url, Error> {
         let endpoint = format!(
             "/o/headless-admin-list-type/v1.0/list-type-definitions/by-external-reference-code/{erc}"
         );
