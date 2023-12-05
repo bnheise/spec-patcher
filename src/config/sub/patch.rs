@@ -10,12 +10,24 @@ pub struct PatchOpt {
 
 #[derive(Debug, Deserialize, Clone, Copy, Default, ValueEnum, PartialEq)]
 pub enum InnerCase {
+    Upper,
+    Lower,
+    Title,
+    Toggle,
     #[default]
     Camel,
     Pascal,
-    ScreamingSnake,
     UpperCamel,
     Snake,
+    UpperSnake,
+    ScreamingSnake,
+    Kebab,
+    Cobol,
+    UpperKebab,
+    Train,
+    Flat,
+    UpperFlat,
+    Alternating,
 }
 
 impl From<InnerCase> for Case {
@@ -26,6 +38,18 @@ impl From<InnerCase> for Case {
             InnerCase::ScreamingSnake => Self::ScreamingSnake,
             InnerCase::UpperCamel => Self::UpperCamel,
             InnerCase::Snake => Self::Snake,
+            InnerCase::Upper => Self::Upper,
+            InnerCase::Lower => Self::Lower,
+            InnerCase::Title => Self::Title,
+            InnerCase::Toggle => Self::Toggle,
+            InnerCase::UpperSnake => Self::UpperSnake,
+            InnerCase::Kebab => Self::Kebab,
+            InnerCase::Cobol => Self::Cobol,
+            InnerCase::UpperKebab => Self::UpperKebab,
+            InnerCase::Train => Self::Train,
+            InnerCase::Flat => Self::Flat,
+            InnerCase::UpperFlat => Self::UpperFlat,
+            InnerCase::Alternating => Self::Alternating,
         }
     }
 }
