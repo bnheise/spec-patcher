@@ -54,7 +54,7 @@ impl From<InnerCase> for Case {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize, Copy)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Copy, Default)]
 pub struct Patch {
     pub enum_case: InnerCase,
 }

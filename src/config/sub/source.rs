@@ -15,6 +15,15 @@ pub struct Source {
     pub erc: String,
 }
 
+impl Default for Source {
+    fn default() -> Self {
+        Self {
+            source_type: SourceType::CustomObject,
+            erc: "TEST".into(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, ValueEnum, Deserialize)]
 pub enum SourceType {
     SystemObject,

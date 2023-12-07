@@ -1,0 +1,239 @@
+{
+  "accountEntryRestricted": false,
+  "accountEntryRestrictedObjectFieldName": "",
+  "actions": {
+    "permissions": {
+      "method": "PATCH",
+      "href": "http://localhost:8080/o/object-admin/v1.0/object-definitions/35504"
+    },
+    "get": {
+      "method": "GET",
+      "href": "http://localhost:8080/o/object-admin/v1.0/object-definitions/35504"
+    },
+    "update": {
+      "method": "PUT",
+      "href": "http://localhost:8080/o/object-admin/v1.0/object-definitions/35504"
+    },
+    "delete": {
+      "method": "DELETE",
+      "href": "http://localhost:8080/o/object-admin/v1.0/object-definitions/35504"
+    }
+  },
+  "active": true,
+  "dateCreated": "2023-12-07T01:04:28Z",
+  "dateModified": "2023-12-07T01:05:34Z",
+  "defaultLanguageId": "en_US",
+  "enableCategorization": true,
+  "enableComments": false,
+  "enableLocalization": false,
+  "enableObjectEntryDraft": false,
+  "enableObjectEntryHistory": false,
+  "externalReferenceCode": "TEST_CUSTOM_OBJECT",
+  "id": 35504,
+  "label": {
+    "en_US": "Test Custom Object"
+  },
+  "modifiable": true,
+  "name": "TestCustomObject",
+  "objectActions": [],
+  "objectFields": [
+    {
+      "DBType": "String",
+      "businessType": "Text",
+      "externalReferenceCode": "b6201389-2bd3-37da-0d79-d45413d2f9fa",
+      "id": 35506,
+      "indexed": false,
+      "indexedAsKeyword": false,
+      "indexedLanguageId": "",
+      "label": {
+        "en_US": "Author"
+      },
+      "listTypeDefinitionId": 0,
+      "localized": false,
+      "name": "creator",
+      "objectFieldSettings": [],
+      "readOnly": "true",
+      "readOnlyConditionExpression": "",
+      "required": false,
+      "state": false,
+      "system": true,
+      "type": "String"
+    },
+    {
+      "DBType": "Date",
+      "businessType": "Date",
+      "externalReferenceCode": "fc70be9b-f8b4-258a-9caf-7ebac8816818",
+      "id": 35508,
+      "indexed": false,
+      "indexedAsKeyword": false,
+      "indexedLanguageId": "",
+      "label": {
+        "en_US": "Create Date"
+      },
+      "listTypeDefinitionId": 0,
+      "localized": false,
+      "name": "createDate",
+      "objectFieldSettings": [],
+      "readOnly": "true",
+      "readOnlyConditionExpression": "",
+      "required": false,
+      "state": false,
+      "system": true,
+      "type": "Date"
+    },
+    {
+      "DBType": "String",
+      "businessType": "Text",
+      "externalReferenceCode": "315c798a-2778-8afb-9de2-4ca580461741",
+      "id": 35510,
+      "indexed": false,
+      "indexedAsKeyword": false,
+      "indexedLanguageId": "",
+      "label": {
+        "en_US": "External Reference Code"
+      },
+      "listTypeDefinitionId": 0,
+      "localized": false,
+      "name": "externalReferenceCode",
+      "objectFieldSettings": [],
+      "readOnly": "false",
+      "readOnlyConditionExpression": "",
+      "required": false,
+      "state": false,
+      "system": true,
+      "type": "String"
+    },
+    {
+      "DBType": "Long",
+      "businessType": "LongInteger",
+      "externalReferenceCode": "5db13d07-7bfb-f2ca-ba44-42abfecb0247",
+      "id": 35512,
+      "indexed": true,
+      "indexedAsKeyword": true,
+      "indexedLanguageId": "",
+      "label": {
+        "en_US": "ID"
+      },
+      "listTypeDefinitionId": 0,
+      "localized": false,
+      "name": "id",
+      "objectFieldSettings": [],
+      "readOnly": "true",
+      "readOnlyConditionExpression": "",
+      "required": false,
+      "state": false,
+      "system": true,
+      "type": "Long"
+    },
+    {
+      "DBType": "Date",
+      "businessType": "Date",
+      "externalReferenceCode": "03582420-5932-52c9-9c89-d84f6e6600a0",
+      "id": 35514,
+      "indexed": false,
+      "indexedAsKeyword": false,
+      "indexedLanguageId": "",
+      "label": {
+        "en_US": "Modified Date"
+      },
+      "listTypeDefinitionId": 0,
+      "localized": false,
+      "name": "modifiedDate",
+      "objectFieldSettings": [],
+      "readOnly": "true",
+      "readOnlyConditionExpression": "",
+      "required": false,
+      "state": false,
+      "system": true,
+      "type": "Date"
+    },
+    {
+      "DBType": "String",
+      "businessType": "Text",
+      "externalReferenceCode": "2c80e62a-d5b4-260c-d6b3-4add6a1766be",
+      "id": 35516,
+      "indexed": false,
+      "indexedAsKeyword": false,
+      "indexedLanguageId": "",
+      "label": {
+        "en_US": "Status"
+      },
+      "listTypeDefinitionId": 0,
+      "localized": false,
+      "name": "status",
+      "objectFieldSettings": [],
+      "readOnly": "true",
+      "readOnlyConditionExpression": "",
+      "required": false,
+      "state": false,
+      "system": true,
+      "type": "String"
+    },
+    {
+      "DBType": "String",
+      "businessType": "Text",
+      "externalReferenceCode": "6d6e960c-3d39-a720-b37b-f19eeac1a949",
+      "id": 35521,
+      "indexed": true,
+      "indexedAsKeyword": false,
+      "indexedLanguageId": "en_US",
+      "label": {
+        "en_US": "Text Field"
+      },
+      "listTypeDefinitionId": 0,
+      "localized": false,
+      "name": "textField",
+      "objectFieldSettings": [],
+      "readOnly": "false",
+      "readOnlyConditionExpression": "",
+      "required": false,
+      "state": false,
+      "system": false,
+      "type": "String"
+    },
+    {
+      "DBType": "String",
+      "businessType": "Picklist",
+      "externalReferenceCode": "7e98ca59-b7d4-2b45-d889-fb72d28804db",
+      "id": 35557,
+      "indexed": true,
+      "indexedAsKeyword": false,
+      "indexedLanguageId": "en_US",
+      "label": {
+        "en_US": "Picklist Field"
+      },
+      "listTypeDefinitionExternalReferenceCode": "TEST_PICKLIST",
+      "listTypeDefinitionId": 35554,
+      "localized": false,
+      "name": "picklistField",
+      "objectFieldSettings": [],
+      "readOnly": "false",
+      "readOnlyConditionExpression": "",
+      "required": false,
+      "state": false,
+      "system": false,
+      "type": "String"
+    }
+  ],
+  "objectFolderExternalReferenceCode": "uncategorized",
+  "objectLayouts": [],
+  "objectRelationships": [],
+  "objectValidationRules": [],
+  "objectViews": [],
+  "panelCategoryKey": "",
+  "parameterRequired": false,
+  "pluralLabel": {
+    "en_US": "Test Custom Object"
+  },
+  "portlet": true,
+  "restContextPath": "/o/c/testcustomobjects",
+  "scope": "company",
+  "status": {
+    "code": 0,
+    "label": "approved",
+    "label_i18n": "Approved"
+  },
+  "storageType": "default",
+  "system": false,
+  "titleObjectFieldName": "id"
+}

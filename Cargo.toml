@@ -10,7 +10,7 @@ path = "src/lib.rs"
 
 [[bin]]
 path = "src/main.rs"
-name = "spec-pather-cli"
+name = "spec-patcher-cli"
 
 [dependencies]
 anyhow = { version = "1.0.75", default-features = false, features = [] }
@@ -41,4 +41,6 @@ thiserror = { version = "1.0.50", default-features = false, features = [] }
 url = { version = "2.5.0", default-features = false, features = ["serde"] }
 
 [dev-dependencies]
+ctor = "0.2.5"
+lazy_static = "1.4.0"
 tempfile = "3.8.1"

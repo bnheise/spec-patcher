@@ -18,10 +18,27 @@ pub struct Connection {
     pub auth: Auth,
 }
 
+impl Default for Connection {
+    fn default() -> Self {
+        Self {
+            base_url: "http://localhost:8080"
+                .try_into()
+                .expect("Error in default base url -- pls fix"),
+            auth: Default::default(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub enum Auth {
     Basic(BasicAuth),
     OAuth(TokenAuth),
+}
+
+impl Default for Auth {
+    fn default() -> Self {
+        Self::Basic(BasicAuth::default())
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Args)]
@@ -31,6 +48,15 @@ pub struct BasicAuth {
     pub username: String,
     #[arg(short = 'p', long = "password", conflicts_with = "oauth")]
     pub password: String,
+}
+
+impl Default for BasicAuth {
+    fn default() -> Self {
+        Self {
+            username: "test@liferay.com".into(),
+            password: "test".into(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Args)]

@@ -1,0 +1,53 @@
+[
+  {
+    "actions": {
+      "permissions": {
+        "method": "PATCH",
+        "href": "http://localhost:8080/o/headless-admin-list-type/v1.0/list-type-definitions/35554"
+      },
+      "get": {
+        "method": "GET",
+        "href": "http://localhost:8080/o/headless-admin-list-type/v1.0/list-type-definitions/35554"
+      },
+      "update": {
+        "method": "PUT",
+        "href": "http://localhost:8080/o/headless-admin-list-type/v1.0/list-type-definitions/35554"
+      }
+    },
+    "dateCreated": "2023-12-07T02:13:07Z",
+    "dateModified": "2023-12-07T02:13:33Z",
+    "externalReferenceCode": "TEST_PICKLIST",
+    "id": 35554,
+    "listTypeEntries": [
+      {
+        "dateCreated": "2023-12-07T02:13:25Z",
+        "dateModified": "2023-12-07T02:13:50Z",
+        "externalReferenceCode": "ITEM_1",
+        "id": 35555,
+        "key": "item1",
+        "name": "Item 1",
+        "name_i18n": {
+          "en-US": "Item 1"
+        },
+        "type": ""
+      },
+      {
+        "dateCreated": "2023-12-07T02:13:42Z",
+        "dateModified": "2023-12-07T02:13:57Z",
+        "externalReferenceCode": "ITEM_2",
+        "id": 35556,
+        "key": "item2",
+        "name": "Item 2",
+        "name_i18n": {
+          "en-US": "Item 2"
+        },
+        "type": ""
+      }
+    ],
+    "name": "Test Picklist",
+    "name_i18n": {
+      "en-US": "Test Picklist"
+    },
+    "system": false
+  }
+]

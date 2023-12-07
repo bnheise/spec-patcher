@@ -65,7 +65,7 @@ fn format_endpoint(
 
 /// The collection of data extracted from Liferay that is needed to
 /// perform patching of the open api spec
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MetaData {
     pub spec: openapi::v3_0::Spec,
     pub object_def: Option<ObjectDefinition>,

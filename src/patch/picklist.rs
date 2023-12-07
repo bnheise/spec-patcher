@@ -1,7 +1,11 @@
-use crate::{config::Config, error::Reporter};
+use crate::{config::Config, error::Reporter, object, schema};
 
-use super::Error;
+use super::{
+    format::{schema_refpath_picklist_key, schema_refpath_piclist_item},
+    Error,
+};
 use convert_case::Casing;
+use liferay_object::models::ObjectDefinition;
 use list_type::models::ListTypeDefinition;
 use openapi::v3_0::{Components, ObjectOrReference, Schema, Spec};
 use std::collections::BTreeMap;
@@ -125,4 +129,71 @@ fn build_item(erc: &str) -> (String, Schema) {
             ..Default::default()
         },
     )
+}
+
+/// When we generate picklist enums with [gen_picklist_enums], we need to also attach
+/// references to those picklists for the object that uses them. This function is used
+/// for that.
+pub fn gen_picklist_enum_references(
+    object_def: &ObjectDefinition,
+    spec: &mut Spec,
+) -> Result<(), Error> {
+    let object_name =
+        object::extract::object_name(object_def).ok_or(Error::MissingField("objectName"))?;
+    let object_schema = schema::extract::object_schema_mut(object_name, spec)
+        .ok_or(Error::MissingSchema(object_name.to_owned()))?;
+
+    let picklist_fields = object::extract::picklist_fields(object_def);
+
+    for picklist_field in picklist_fields.into_iter() {
+        let field_name = picklist_field
+            .name
+            .as_deref()
+            .ok_or(Error::MissingField("name"))?;
+        let picklist_schema = object_schema
+            .properties
+            .as_mut()
+            .ok_or(Error::MissingField("properties"))?
+            .get_mut(field_name)
+            .ok_or(Error::InvalidSchema("Picklist field schema missing"))?;
+
+        let picklist_erc = picklist_field
+            .list_type_definition_external_reference_code
+            .as_deref()
+            .ok_or(Error::InvalidObjectDef(
+                "Missing picklist field external reference code",
+            ))?;
+
+        let business_type = picklist_field
+            .business_type
+            .as_ref()
+            .ok_or(Error::MissingField("business_type"))?;
+
+        match business_type {
+                liferay_object::models::object_field::BusinessType::MultiselectPicklist => {
+                    picklist_schema.items.get_or_insert(Box::<Schema>::default()).one_of = gen_picklist_references(picklist_erc);
+                    picklist_schema.schema_type = Some("array".into());
+                },
+                liferay_object::models::object_field::BusinessType::Picklist => {
+                    gen_picklist_references(picklist_erc);
+                    picklist_schema.schema_type = None;
+                },
+                _ => Err(Error::InvalidObjectDef("Picklist field should have business type of either MultiselectPicklist or Picklist"))?,
+            }
+    }
+
+    Ok(())
+}
+
+/// Generate the various reference strings to link the object definition picklist fields to the
+/// definition of the picklist.
+fn gen_picklist_references(erc: &str) -> Option<Vec<ObjectOrReference<Schema>>> {
+    Some(vec![
+        ObjectOrReference::Ref {
+            ref_path: schema_refpath_picklist_key(erc),
+        },
+        ObjectOrReference::Ref {
+            ref_path: schema_refpath_piclist_item(erc),
+        },
+    ])
 }

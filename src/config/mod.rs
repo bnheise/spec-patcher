@@ -180,3 +180,14 @@ impl Config {
         InnerConfig::init()
     }
 }
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            connection: Default::default(),
+            source: Default::default(),
+            output: Default::default(),
+            patch: Default::default(),
+        }
+    }
+}
