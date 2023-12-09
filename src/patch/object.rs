@@ -1,15 +1,15 @@
-use std::collections::BTreeMap;
-
-use liferay_object::models::{ObjectDefinition, ObjectField};
-use openapi::v3_0::{ObjectOrReference, Schema, Spec};
-
-use crate::{object, schema};
-
 use super::{format, Error};
+use crate::{object, schema};
+use liferay_object::models::{ObjectDefinition, ObjectField};
+use oas::{OpenAPIV3, Operation, ParameterIn, Reference, Referenceable, Schema};
+use std::collections::BTreeMap;
 
 /// There are some default settings of a generated object schema that will cause
 /// many type generators to fail. This removes those.
-pub fn clean_object_schema(spec: &mut Spec, object_def: &ObjectDefinition) -> Result<(), Error> {
+pub fn clean_object_schema(
+    spec: &mut OpenAPIV3,
+    object_def: &ObjectDefinition,
+) -> Result<(), Error> {
     let object_name =
         object::extract::object_name(object_def).ok_or(Error::MissingField("objectName"))?;
 
@@ -33,27 +33,27 @@ pub fn clean_object_schema(spec: &mut Spec, object_def: &ObjectDefinition) -> Re
 
 pub fn redirect_creator(properties: &mut BTreeMap<String, Schema>) {
     if let Some(creator) = properties.get_mut("creator") {
-        creator.schema_type = None;
-        creator.ref_path = Some("#/components/schemas/Creator".into())
+        creator._type = None;
+        creator._ref = Some("#/components/schemas/Creator".into())
     }
 }
 
 /// Remove schema type 'object' for arrays
 fn clean_array_type(schema: &mut Schema) {
     if schema
-        .schema_type
+        ._type
         .as_ref()
-        .map(|schema_type| schema_type == "array")
+        .map(|_type| *_type == oas::Type::Array)
         .unwrap_or_default()
     {
         if let Some(items) = schema.items.as_mut() {
             if items
-                .schema_type
+                ._type
                 .as_ref()
-                .map(|schema_type| schema_type == "object")
+                .map(|_type| *_type == oas::Type::Object)
                 .unwrap_or_default()
             {
-                schema.schema_type = None;
+                schema._type = None;
             }
         };
     };
@@ -72,22 +72,22 @@ fn redirect_attachment_fields(
             if let Some(name) = field.name.as_deref() {
                 if let Some(schema) = properties.get_mut(name) {
                     schema.one_of = Some(vec![
-                        ObjectOrReference::Ref {
-                            ref_path: "#/components/schemas/Attachment".into(),
-                        },
-                        ObjectOrReference::Object(Schema {
-                            schema_type: Some("integer".into()),
+                        Referenceable::Reference(Reference {
+                            _ref: "#/components/schemas/Attachment".into(),
+                        }),
+                        Referenceable::Data(Schema {
+                            _type: Some(oas::Type::Integer),
                             ..Default::default()
                         }),
                     ]);
-                    schema.schema_type = None;
+                    schema._type = None;
                 }
             }
         })
 }
 
 /// Create enums for field names and ERCs for use in API parameters
-pub fn gen_field_enums(spec: &mut Spec, object_def: &ObjectDefinition) -> Result<(), Error> {
+pub fn gen_field_enums(spec: &mut OpenAPIV3, object_def: &ObjectDefinition) -> Result<(), Error> {
     let object_name =
         object::extract::object_name(object_def).ok_or(Error::MissingField("name"))?;
 
@@ -105,13 +105,13 @@ pub fn gen_field_enums(spec: &mut Spec, object_def: &ObjectDefinition) -> Result
             .collect::<Vec<_>>();
 
         let field_name_enum = Schema {
-            enum_values: Some(field_names),
-            schema_type: Some("string".into()),
+            _enum: Some(field_names),
+            _type: Some(oas::Type::String),
             ..Default::default()
         };
 
         let field_enum_name = format::fieldname_enum_name(object_name);
-        schemas.insert(field_enum_name, ObjectOrReference::Object(field_name_enum));
+        schemas.insert(field_enum_name, Referenceable::Data(field_name_enum));
 
         // Create and insert enums for field ERCs
         let field_ercs = std_fields
@@ -120,26 +120,23 @@ pub fn gen_field_enums(spec: &mut Spec, object_def: &ObjectDefinition) -> Result
             .collect::<Vec<_>>();
 
         let field_name_enum = Schema {
-            enum_values: Some(field_ercs),
-            schema_type: Some("string".into()),
+            _enum: Some(field_ercs),
+            _type: Some(oas::Type::String),
             ..Default::default()
         };
         let erc_enum_name = format::erc_enum_name(object_name);
-        schemas.insert(erc_enum_name, ObjectOrReference::Object(field_name_enum));
+        schemas.insert(erc_enum_name, Referenceable::Data(field_name_enum));
 
         // Create and insert enums for relationship fields
         let relationship_fields = object::extract::relationship_fields(object_def);
         let (mut parent_names, all) = extract_relationship_field_names(relationship_fields);
         let relation_name_enum = Schema {
-            enum_values: Some(all),
-            schema_type: Some("string".into()),
+            _enum: Some(all),
+            _type: Some(oas::Type::String),
             ..Default::default()
         };
         let relation_enum_name = format::relation_enum_name(object_name);
-        schemas.insert(
-            relation_enum_name,
-            ObjectOrReference::Object(relation_name_enum),
-        );
+        schemas.insert(relation_enum_name, Referenceable::Data(relation_name_enum));
 
         // Create enum for nested field names
         let mut nested_field_names = object_def
@@ -153,15 +150,12 @@ pub fn gen_field_enums(spec: &mut Spec, object_def: &ObjectDefinition) -> Result
             .unwrap_or_default();
         nested_field_names.append(&mut parent_names);
         let nested_field_enum = Schema {
-            enum_values: Some(nested_field_names),
-            schema_type: Some("string".into()),
+            _enum: Some(nested_field_names),
+            _type: Some(oas::Type::String),
             ..Default::default()
         };
         let relation_enum_name = format::nested_field_enum_name(object_name);
-        schemas.insert(
-            relation_enum_name,
-            ObjectOrReference::Object(nested_field_enum),
-        );
+        schemas.insert(relation_enum_name, Referenceable::Data(nested_field_enum));
     }
     Ok(())
 }
@@ -200,12 +194,18 @@ fn extract_relationship_field_names(
 
 pub fn gen_field_enum_references(
     object_def: &ObjectDefinition,
-    spec: &mut Spec,
+    spec: &mut OpenAPIV3,
 ) -> Result<(), Error> {
+    println!("CALLED");
     let is_system_object = object_def.system.unwrap_or_default();
+
     if !is_system_object {
-        let paths = spec
-            .paths
+        println!("CALLED");
+        let object_name =
+            object::extract::object_name(object_def).ok_or(Error::MissingField("name"))?;
+        let relation_field_count = object::extract::relationship_fields(object_def).len();
+
+        spec.paths
             .values_mut()
             .filter_map(|path| path.get.as_mut())
             .filter(|get| {
@@ -214,14 +214,80 @@ pub fn gen_field_enum_references(
                     .map(|op_id| op_id != "getOpenAPI")
                     .unwrap_or_default()
             })
-            .filter_map(|get: &mut openapi::v3_0::Operation| get.parameters.as_mut())
-            .map(|params| {
-                let params = params.iter_mut().map(|param| {
-                    if let ObjectOrReference::Object(ref_obj) = param {};
-                    todo!();
+            .filter_map(|get: &mut Operation| get.parameters.as_mut())
+            .for_each(|params| {
+                dbg!(&params);
+                let system_field_name_ref = Schema {
+                    _ref: Some("#/components/schemas/SystemFieldName".into()),
+                    ..Default::default()
+                };
+                let field_name_ref = Schema {
+                    _ref: Some(format!("#/components/schemas/{object_name}FieldName")),
+                    ..Default::default()
+                };
+                let nested_field_name_ref = Schema {
+                    _ref: Some(format!("#/components/schemas/{object_name}NestedFieldName")),
+                    ..Default::default()
+                };
+                let relation_field_name_ref = Schema {
+                    _ref: Some(format!(
+                        "#/components/schemas/{object_name}RelationshipFieldName"
+                    )),
+                    ..Default::default()
+                };
+                let string_type = Schema {
+                    _type: Some(oas::Type::String),
+                    ..Default::default()
+                };
+
+                let items = {
+                    let mut items = vec![system_field_name_ref, field_name_ref, string_type];
+                    if relation_field_count > 0 {
+                        items.push(relation_field_name_ref);
+                        items.push(nested_field_name_ref); // TODO: check if error and fix
+                    };
+                    items
+                };
+                params.iter_mut().for_each(|param| {
+                    if let Referenceable::Data(param) = param {
+                        if param.name == "restrictFields"
+                            || param.name == "fields"
+                            || param.name == "nestedFields"
+                        {
+                            param._in = ParameterIn::Query;
+                            param.style = Some(oas::Style::Form);
+                            param.explode = Some(true);
+                        }
+                        if param.name == "restrictFields" || param.name == "fields" {
+                            param.schema = Some(Schema {
+                                _type: Some(oas::Type::Array),
+                                items: Some(Box::new(Schema {
+                                    one_of: Some(
+                                        items
+                                            .iter()
+                                            .map(|item| Referenceable::Data(item.to_owned()))
+                                            .collect::<Vec<_>>(),
+                                    ),
+                                    ..Default::default()
+                                })),
+                                ..Default::default()
+                            })
+                        } else if param.name == "nestedFields" {
+                            // TODO: handle case where there are no nested fields
+                            param.schema = Some(Schema {
+                                _type: Some(oas::Type::Array),
+                                items: Some(Box::new(Schema {
+                                    _ref: Some(format!(
+                                        "#/components/schemas/{object_name}NestedFieldName"
+                                    )),
+                                    ..Default::default()
+                                })),
+                                ..Default::default()
+                            })
+                        }
+                    };
                 });
             });
-        // TODO: finish on line 480-ish
     };
     Ok(())
 }

@@ -1,4 +1,4 @@
-use openapi::v3_0::Spec;
+use oas::OpenAPIV3;
 use serde_json::Value;
 use std::{fs, io::Write};
 
@@ -7,7 +7,7 @@ use crate::config::sub::output::Output;
 mod error;
 pub use error::Error;
 
-pub fn output(config: &Output, spec: &Spec) -> Result<(), Error> {
+pub fn output(config: &Output, spec: &OpenAPIV3) -> Result<(), Error> {
     let output = serde_json::to_string_pretty(&spec)?;
     if let Some(path) = &config.output {
         let spec = if path.exists() {

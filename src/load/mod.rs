@@ -9,6 +9,7 @@ use list_type::models::ListTypeDefinition;
 pub mod client;
 mod error;
 pub use error::Error;
+use oas::OpenAPIV3;
 mod extract;
 mod format;
 
@@ -67,7 +68,7 @@ fn format_endpoint(
 /// perform patching of the open api spec
 #[derive(Debug, Clone)]
 pub struct MetaData {
-    pub spec: openapi::v3_0::Spec,
+    pub spec: OpenAPIV3,
     pub object_def: Option<ObjectDefinition>,
     pub picklists: Option<Vec<ListTypeDefinition>>,
 }

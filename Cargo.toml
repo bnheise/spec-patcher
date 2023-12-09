@@ -25,9 +25,10 @@ clap = { version = "4.4.10", default-features = false, features = [
 ] }
 config = { version = "0.13.4", default-features = false, features = ["yaml"] }
 convert_case = "0.6.0"
+dotenv = "0.15.0"
 liferay_object = { path = "./object_def" }
 list-type = { path = "./picklist" }
-openapi = { path = "../openapi", default-features = false }
+oas = { path = "../oas", default-features = false }
 reqwest = { version = "0.11.22", default-features = false, features = [
   "blocking",
   "json",

@@ -1,19 +1,18 @@
-use crate::{config::Config, load::MetaData};
-use openapi::v3_0::Spec;
-
 use self::{
     object::{clean_object_schema, gen_field_enum_references, gen_field_enums},
     picklist::{gen_picklist_enum_references, gen_picklist_enums},
 };
+use crate::{config::Config, load::MetaData};
 
 mod error;
 mod format;
 mod picklist;
 mod relation;
 pub use error::Error;
+use oas::OpenAPIV3;
 mod object;
 
-pub fn patch(config: &Config, metadata: MetaData) -> Result<Spec, Error> {
+pub fn patch(config: &Config, metadata: MetaData) -> Result<OpenAPIV3, Error> {
     let mut spec = metadata.spec;
 
     if let Some(ref object_def) = metadata.object_def {
@@ -39,12 +38,12 @@ mod test {
     use lazy_static::lazy_static;
     use liferay_object::models::ObjectDefinition;
     use list_type::models::ListTypeDefinition;
-    use openapi::v3_0::{ObjectOrReference, Spec};
+    use oas::{OpenAPIV3, Referenceable};
 
     use crate::{config::Config, load::MetaData, patch::patch};
 
     struct TestResult {
-        pub spec: Spec,
+        pub spec: OpenAPIV3,
         pub metadata: MetaData,
     }
 
@@ -97,7 +96,7 @@ mod test {
                 serde_json::from_str(&object_def).expect("Failed to deserialize object definition");
             let spec = std::fs::read_to_string("./src/patch/test_files/test_spec.json")
                 .expect("Failed to find test open api spec");
-            let spec: Spec =
+            let spec: OpenAPIV3 =
                 serde_json::from_str(&spec).expect("Failed to deserialize open api spec");
             let picklists = std::fs::read_to_string("./src/patch/test_files/test_picklists.json")
                 .expect("Failed to find test picklists file");
@@ -121,12 +120,12 @@ mod test {
         CUSTOM_OBJECT_RESULT.spec.components.as_ref().map(|comp| {
             comp.schemas.as_ref().map(|schemas| {
                 schemas.values().for_each(|schema| {
-                    if let ObjectOrReference::Object(schema_obj) = schema {
+                    if let Referenceable::Data(schema_obj) = schema {
                         schema_obj.properties.as_ref().map(|properties| {
                             properties.get("creator").map(|creator| {
-                                assert_eq!(creator.schema_type, None);
+                                assert_eq!(creator._type, None);
                                 assert_eq!(
-                                    creator.ref_path,
+                                    creator._ref,
                                     Some("#/components/schemas/Creator".into())
                                 )
                             })
@@ -173,15 +172,15 @@ mod test {
                             .get(&erc.to_case(Case::Camel))
                             .expect("There should be a schema for a given erc");
                         let schema = match schema {
-                            ObjectOrReference::Object(schema) => schema,
-                            ObjectOrReference::Ref { .. } => {
+                            Referenceable::Data(schema) => schema,
+                            Referenceable::Reference { .. } => {
                                 panic!("Picklist shold not be a ref string")
                             }
                         };
                         let picklist_items =
                             CUSTOM_OBJECT_RESULT.get_picklist_item_ercs_by_picklist_erc(erc);
                         let mut values = schema
-                            .enum_values
+                            ._enum
                             .as_ref()
                             .expect("there should be enum values")
                             .clone();
@@ -261,8 +260,8 @@ mod test {
             .expect("the field enum should exist");
 
         match field_enum {
-            ObjectOrReference::Ref { .. } => panic!("Field enum should not be ref"),
-            ObjectOrReference::Object(..) => (),
+            Referenceable::Reference(..) => panic!("Field enum should not be ref"),
+            Referenceable::Data(..) => (),
         };
     }
 }

@@ -134,7 +134,7 @@ pub fn relationship_fields(object_def: &ObjectDefinition) -> Vec<&ObjectField> {
                         && field
                             .business_type
                             .filter(|bus_type| *bus_type == BusinessType::Relationship)
-                            .is_none()
+                            .is_some()
                 })
                 .collect::<Vec<_>>()
         })

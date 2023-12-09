@@ -4,6 +4,7 @@ use crate::{
 };
 use liferay_object::models::ObjectDefinition;
 use list_type::models::ListTypeDefinition;
+use oas::OpenAPIV3;
 use reqwest::{
     blocking::RequestBuilder,
     header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE},
@@ -28,11 +29,7 @@ impl Client {
     }
 
     /// Load an open api specification from a remote Liferay instance
-    pub fn get_spec(
-        &mut self,
-        config: &Config,
-        endpoint: String,
-    ) -> Result<openapi::v3_0::Spec, Error> {
+    pub fn get_spec(&mut self, config: &Config, endpoint: String) -> Result<OpenAPIV3, Error> {
         let mut req = self.client.get(config.connection.base_url.join(&endpoint)?);
         req = self.set_auth(req, config)?;
         req.send()

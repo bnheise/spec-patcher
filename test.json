@@ -247,15 +247,15 @@
             "format": "int64",
             "type": "integer"
           },
-          "page": {
-            "format": "int64",
-            "type": "integer"
-          },
           "facets": {
             "items": {
               "$ref": "#/components/schemas/Facet"
             },
             "type": "array"
+          },
+          "page": {
+            "format": "int64",
+            "type": "integer"
           },
           "actions": {
             "additionalProperties": {
@@ -307,15 +307,15 @@
             "format": "int64",
             "type": "integer"
           },
-          "page": {
-            "format": "int64",
-            "type": "integer"
-          },
           "facets": {
             "items": {
               "$ref": "#/components/schemas/Facet"
             },
             "type": "array"
+          },
+          "page": {
+            "format": "int64",
+            "type": "integer"
           },
           "actions": {
             "additionalProperties": {
@@ -431,6 +431,13 @@
             "readOnly": true,
             "type": "string"
           },
+          "attachment": {
+            "extensions": {
+              "x-parent-map": "properties"
+            },
+            "readOnly": false,
+            "type": "object"
+          },
           "deliveryAddress": {
             "extensions": {
               "x-parent-map": "properties"
@@ -438,7 +445,165 @@
             "readOnly": false,
             "type": "string"
           },
+          "formula": {
+            "extensions": {
+              "x-parent-map": "properties"
+            },
+            "readOnly": true,
+            "type": "string"
+          },
+          "longInt": {
+            "extensions": {
+              "x-parent-map": "properties"
+            },
+            "format": "int64",
+            "readOnly": false,
+            "type": "integer"
+          },
+          "picklistField": {
+            "extensions": {
+              "x-parent-map": "properties"
+            },
+            "readOnly": false,
+            "type": "object"
+          },
           "pickupAddress": {
+            "extensions": {
+              "x-parent-map": "properties"
+            },
+            "readOnly": false,
+            "type": "string"
+          },
+          "address": {
+            "description": "Information about the relationship address can be embedded with \"nestedFields\".",
+            "items": {
+              "$ref": "#/components/schemas/AddressEntry",
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "ObjectEntry"
+        }
+      },
+      "AddressEntry": {
+        "properties": {
+          "actions": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "auditEvents": {
+            "description": "Optional field with the audit events associated with this object entry, can be embedded with nestedFields",
+            "items": {
+              "$ref": "#/components/schemas/AuditEvent"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "creator": {
+            "extensions": {
+              "x-parent-map": "properties"
+            },
+            "readOnly": true,
+            "type": "string"
+          },
+          "dateCreated": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "dateModified": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "externalReferenceCode": {
+            "extensions": {
+              "x-parent-map": "properties"
+            },
+            "readOnly": false,
+            "type": "string"
+          },
+          "id": {
+            "extensions": {
+              "x-parent-map": "properties"
+            },
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "keywords": {
+            "description": "A list of keywords describing the object entry.",
+            "items": {
+              "description": "A list of keywords describing the object entry.",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopeKey": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "status": {
+            "extensions": {
+              "x-parent-map": "properties"
+            },
+            "readOnly": true,
+            "type": "string"
+          },
+          "taxonomyCategoryBriefs": {
+            "description": "The categories associated with this object entry.",
+            "items": {
+              "$ref": "#/components/schemas/TaxonomyCategoryBrief"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "taxonomyCategoryIds": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array",
+            "writeOnly": true
+          },
+          "x-class-name": {
+            "default": "com.liferay.object.rest.dto.v1_0.ObjectEntry",
+            "readOnly": true,
+            "type": "string"
+          },
+          "x-schema-name": {
+            "default": "AddressEntry",
+            "readOnly": true,
+            "type": "string"
+          },
+          "r_address_c_booking2Id": {
+            "extensions": {
+              "x-parent-map": "properties"
+            },
+            "format": "int64",
+            "readOnly": false,
+            "type": "integer"
+          },
+          "address": {
+            "description": "Information about the relationship address can be embedded with \"nestedFields\".",
+            "type": "object"
+          },
+          "r_address_c_booking2ERC": {
+            "extensions": {
+              "x-parent-map": "properties"
+            },
+            "type": "string"
+          },
+          "streetLine1": {
             "extensions": {
               "x-parent-map": "properties"
             },
@@ -450,6 +615,54 @@
         "xml": {
           "name": "ObjectEntry"
         }
+      },
+      "PageAddressEntry": {
+        "properties": {
+          "lastPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "extensions": {},
+            "items": {
+              "$ref": "#/components/schemas/AddressEntry"
+            },
+            "type": "array"
+          },
+          "pageSize": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "facets": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "actions": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "x-schema-name": {
+            "default": "PageAddressEntry",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
       }
     }
   },
@@ -459,239 +672,6 @@
   },
   "openapi": "3.0.1",
   "paths": {
-    "/": {
-      "get": {
-        "operationId": "getBooking2sPage",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "aggregationTerms",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "flatten",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "nestedFields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "restrictFields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "filter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "page",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "pageSize",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "search",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "sort",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PageBooking2"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/PageBooking2"
-                }
-              }
-            },
-            "description": "default response"
-          }
-        },
-        "tags": [
-          "Booking2"
-        ]
-      },
-      "post": {
-        "operationId": "postBooking2",
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Booking2"
-              }
-            },
-            "application/xml": {
-              "schema": {
-                "$ref": "#/components/schemas/Booking2"
-              }
-            }
-          }
-        },
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Booking2"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Booking2"
-                }
-              }
-            },
-            "description": "default response"
-          }
-        },
-        "tags": [
-          "Booking2"
-        ]
-      }
-    },
-    "/batch": {
-      "delete": {
-        "operationId": "deleteBooking2Batch",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "callbackURL",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        },
-        "tags": [
-          "Booking2"
-        ]
-      },
-      "post": {
-        "operationId": "postBooking2Batch",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "callbackURL",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        },
-        "tags": [
-          "Booking2"
-        ]
-      },
-      "put": {
-        "operationId": "putBooking2Batch",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "callbackURL",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "default response"
-          }
-        },
-        "tags": [
-          "Booking2"
-        ]
-      }
-    },
     "/by-external-reference-code/{externalReferenceCode}": {
       "delete": {
         "operationId": "deleteByExternalReferenceCode",
@@ -914,6 +894,239 @@
             }
           }
         ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "default response"
+          }
+        },
+        "tags": [
+          "Booking2"
+        ]
+      }
+    },
+    "/": {
+      "get": {
+        "operationId": "getBooking2sPage",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "aggregationTerms",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "flatten",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nestedFields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "restrictFields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageBooking2"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageBooking2"
+                }
+              }
+            },
+            "description": "default response"
+          }
+        },
+        "tags": [
+          "Booking2"
+        ]
+      },
+      "post": {
+        "operationId": "postBooking2",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Booking2"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/Booking2"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Booking2"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Booking2"
+                }
+              }
+            },
+            "description": "default response"
+          }
+        },
+        "tags": [
+          "Booking2"
+        ]
+      }
+    },
+    "/batch": {
+      "delete": {
+        "operationId": "deleteBooking2Batch",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "callbackURL",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "default response"
+          }
+        },
+        "tags": [
+          "Booking2"
+        ]
+      },
+      "post": {
+        "operationId": "postBooking2Batch",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "callbackURL",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "default response"
+          }
+        },
+        "tags": [
+          "Booking2"
+        ]
+      },
+      "put": {
+        "operationId": "putBooking2Batch",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "callbackURL",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "default": {
             "content": {
@@ -1231,6 +1444,195 @@
               "application/xml": {
                 "schema": {
                   "$ref": "#/components/schemas/PagePermission"
+                }
+              }
+            },
+            "description": "default response"
+          }
+        },
+        "tags": [
+          "Booking2"
+        ]
+      }
+    },
+    "/{booking2Id}/address": {
+      "get": {
+        "operationId": "getBooking2AddressAddressEntryPage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking2Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nestedFields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "restrictFields",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageAddressEntry"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageAddressEntry"
+                }
+              }
+            },
+            "description": "default response"
+          }
+        },
+        "tags": [
+          "Booking2"
+        ]
+      }
+    },
+    "/{booking2Id}/address/{addressEntryId}": {
+      "delete": {
+        "operationId": "deleteBooking2AddressAddressEntry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking2Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "addressEntryId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {},
+              "application/xml": {}
+            },
+            "description": "default response"
+          }
+        },
+        "tags": [
+          "Booking2"
+        ]
+      },
+      "put": {
+        "operationId": "putBooking2AddressAddressEntry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking2Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "addressEntryId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressEntry"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressEntry"
+                }
+              }
+            },
+            "description": "default response"
+          }
+        },
+        "tags": [
+          "Booking2"
+        ]
+      }
+    },
+    "/by-external-reference-code/{currentExternalReferenceCode}/address/{relatedExternalReferenceCode}": {
+      "put": {
+        "operationId": "putBooking2AddressAddressEntry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "currentExternalReferenceCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "relatedExternalReferenceCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressEntry"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressEntry"
                 }
               }
             },

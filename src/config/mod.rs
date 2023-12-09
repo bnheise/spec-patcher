@@ -39,6 +39,7 @@ impl InnerConfig {
     /// Initialize the command line config and the [FileEnvConfig], then merge
     /// them together to create the final [Config].
     pub fn init() -> Result<Config, Error> {
+        dotenv::dotenv().expect("Dotenv failed");
         let file_args = FileEnvConfig::init()?;
         let cli_args = Self::parse();
 
@@ -48,7 +49,7 @@ impl InnerConfig {
 
 /// Contains the configuration settings for loading, patching, and outputting the
 /// open api specification.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Default)]
 pub struct Config {
     pub connection: Connection,
     pub source: Source,
@@ -140,10 +141,7 @@ impl Config {
             None => file
                 .patch
                 .as_ref()
-                .ok_or(Error::MissingArg("enum_case"))?
-                .enum_case
-                .as_ref()
-                .map(InnerCase::to_owned)
+                .and_then(|patch| patch.enum_case.as_ref().map(InnerCase::to_owned))
                 .unwrap_or_default(),
         }
         .to_owned();
@@ -178,16 +176,5 @@ impl Config {
     /// environment variables, and parameters from a config file
     pub fn init() -> Result<Self, Error> {
         InnerConfig::init()
-    }
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            connection: Default::default(),
-            source: Default::default(),
-            output: Default::default(),
-            patch: Default::default(),
-        }
     }
 }

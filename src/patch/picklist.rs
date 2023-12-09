@@ -7,14 +7,18 @@ use super::{
 use convert_case::Casing;
 use liferay_object::models::ObjectDefinition;
 use list_type::models::ListTypeDefinition;
-use openapi::v3_0::{Components, ObjectOrReference, Schema, Spec};
+use oas::{Components, OpenAPIV3, Reference, Referenceable, Schema};
 use std::collections::BTreeMap;
 
 /// Open api specification allows defining enums, which are very useful when handling picklist
 /// inputs. However, Liferay's open api specification completely ignores this feature and instead
 /// models picklists as raw strings. This patch fixes this issue by converting picklist values
 /// to openapi enums.
-pub fn gen_picklist_enums(config: &Config, picklists: Vec<ListTypeDefinition>, spec: &mut Spec) {
+pub fn gen_picklist_enums(
+    config: &Config,
+    picklists: Vec<ListTypeDefinition>,
+    spec: &mut OpenAPIV3,
+) {
     let (enums, errors): (Vec<_>, Vec<_>) = picklists
         .into_iter()
         .map(picklist_to_enum(config))
@@ -34,7 +38,7 @@ pub fn gen_picklist_enums(config: &Config, picklists: Vec<ListTypeDefinition>, s
         .get_or_insert(BTreeMap::new());
 
     enums.into_iter().for_each(|(key, enum_schema)| {
-        schemas.insert(key, ObjectOrReference::Object(enum_schema));
+        schemas.insert(key, oas::Referenceable::Data(enum_schema));
     });
 }
 
@@ -67,14 +71,14 @@ fn build_erc_enum(picklist: &ListTypeDefinition, erc: &str) -> Result<(String, S
     Ok((
         erc.to_owned(),
         Schema {
-            schema_type: Some("string".into()),
+            _type: Some(oas::Type::String),
             example: Some(serde_json::to_value(
                 [erc_enum_opts
                     .get(0)
                     .map(|s| s.to_owned())
                     .unwrap_or_default(); 1],
             )?),
-            enum_values: Some(erc_enum_opts),
+            _enum: Some(erc_enum_opts),
             ..Default::default()
         },
     ))
@@ -92,11 +96,11 @@ fn build_key_enum(picklist: &ListTypeDefinition, erc: &str) -> Result<(String, S
     Ok((
         format!("{erc}Key"),
         Schema {
-            schema_type: Some("string".into()),
+            _type: Some(oas::Type::String),
             example: Some(serde_json::to_value(
                 [key_opts.get(0).map(|s| s.to_owned()).unwrap_or_default(); 1],
             )?),
-            enum_values: Some(key_opts),
+            _enum: Some(key_opts),
             description: Some(erc.into()),
             ..Default::default()
         },
@@ -108,14 +112,14 @@ fn build_item(erc: &str) -> (String, Schema) {
     properties.insert(
         "key".into(),
         Schema {
-            ref_path: Some(format!("#/components/schemas/${erc}Key")),
+            _ref: Some(format!("#/components/schemas/{erc}Key")),
             ..Default::default()
         },
     );
     properties.insert(
         "name".into(),
         Schema {
-            schema_type: Some("string".into()),
+            _type: Some(oas::Type::String),
             ..Default::default()
         },
     );
@@ -123,7 +127,7 @@ fn build_item(erc: &str) -> (String, Schema) {
     (
         format!("{erc}Item"),
         Schema {
-            schema_type: Some("object".into()),
+            _type: Some(oas::Type::Object),
             properties: Some(properties),
             required: Some(vec!["key".into()]),
             ..Default::default()
@@ -136,7 +140,7 @@ fn build_item(erc: &str) -> (String, Schema) {
 /// for that.
 pub fn gen_picklist_enum_references(
     object_def: &ObjectDefinition,
-    spec: &mut Spec,
+    spec: &mut OpenAPIV3,
 ) -> Result<(), Error> {
     let object_name =
         object::extract::object_name(object_def).ok_or(Error::MissingField("objectName"))?;
@@ -172,11 +176,11 @@ pub fn gen_picklist_enum_references(
         match business_type {
                 liferay_object::models::object_field::BusinessType::MultiselectPicklist => {
                     picklist_schema.items.get_or_insert(Box::<Schema>::default()).one_of = gen_picklist_references(picklist_erc);
-                    picklist_schema.schema_type = Some("array".into());
+                    picklist_schema._type = Some(oas::Type::Array);
                 },
                 liferay_object::models::object_field::BusinessType::Picklist => {
                     gen_picklist_references(picklist_erc);
-                    picklist_schema.schema_type = None;
+                    picklist_schema._type = None;
                 },
                 _ => Err(Error::InvalidObjectDef("Picklist field should have business type of either MultiselectPicklist or Picklist"))?,
             }
@@ -187,13 +191,13 @@ pub fn gen_picklist_enum_references(
 
 /// Generate the various reference strings to link the object definition picklist fields to the
 /// definition of the picklist.
-fn gen_picklist_references(erc: &str) -> Option<Vec<ObjectOrReference<Schema>>> {
+fn gen_picklist_references(erc: &str) -> Option<Vec<Referenceable<Schema>>> {
     Some(vec![
-        ObjectOrReference::Ref {
-            ref_path: schema_refpath_picklist_key(erc),
-        },
-        ObjectOrReference::Ref {
-            ref_path: schema_refpath_piclist_item(erc),
-        },
+        Referenceable::Reference(Reference {
+            _ref: schema_refpath_picklist_key(erc),
+        }),
+        Referenceable::Reference(Reference {
+            _ref: schema_refpath_piclist_item(erc),
+        }),
     ])
 }
